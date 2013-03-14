@@ -1,0 +1,32 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0301 
+header_name {.h} 
+code_name {.cxx}
+decl {\#include<Fl_Native_File_Chooser.h>} {public global
+} 
+
+decl {Fl_Native_File_Chooser* native_file_opener;} {public global
+} 
+
+Function {} {open
+} {
+  Fl_Window objviewer {
+    label {Obj viewer} open selected
+    xywh {753 304 656 524} type Double resizable
+    code0 {\#include"MainGL.h"}
+    class MainGL visible
+  } {
+    Fl_Menu_Bar {} {open
+      xywh {0 0 656 20}
+    } {
+      MenuItem {} {
+        label file
+        callback {native_file_opener->filter("obj file\\t*.obj");
+if( native_file_opener->show() == 0 ){
+   objviewer->load( native_file_opener->filename() );
+}}
+        xywh {0 0 30 20}
+      }
+    }
+  }
+} 
