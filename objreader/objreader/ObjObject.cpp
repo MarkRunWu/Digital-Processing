@@ -7,6 +7,9 @@ ObjObject::ObjObject(void)
 	minv[0] = minv[1] = minv[2] = 1e37;
 	maxv[0] = maxv[1] = maxv[2] =  1e-37;
 	scale_x = scale_y = scale_z = 1.0;
+	face_color[0] = face_color[1] = face_color[2] = line_color[0] = line_color[1] = line_color[2] = 0;
+	line_color[3] = face_color[3] = 1;
+	this->b_draw_faces = this->b_draw_lines = this->b_draw_points = true;
 }
 
 
@@ -62,6 +65,14 @@ void ObjObject::ToUnit(){
 		pts[i].y = scale_y *((pts[i].y - minv[1])/(maxv[1] - minv[1]) -0.5 );
 		pts[i].z = scale_z *((pts[i].z - minv[2])/(maxv[2] - minv[2]) -0.5 );
 	}
+	minv[0] = scale_x *  -0.5;
+	maxv[0] = scale_x *  0.5;
+
+	minv[1] = scale_y *  -0.5;
+	maxv[1] = scale_y *  0.5;
+
+	minv[2] = scale_z *  -0.5;
+	maxv[2] = scale_z *  0.5;
 
 }
 void ObjObject::loadFile( const char* filename ){
@@ -137,34 +148,77 @@ void ObjObject::testValue( int n , int fn ){
 		
 
 }
+void ObjObject::draw(){
+	if( b_draw_points ){
+		glBegin(GL_POINTS);	
+			for( size_t i = 0 ; i != pts.size(); i++ ){
+				glVertex3f( pts[i].x , pts[i].y , pts[i].z );
+			}
+		glEnd();
+	}
+		
+	//顯示線條LINES
+	glLineWidth(1.0);
+	glEnable( GL_POLYGON_OFFSET_LINE );
+	glPolygonOffset( -1.5 , -1.5 );
+
+	if( b_draw_lines ){
+		glBegin(GL_LINES);
+			glColor3fv(line_color);
+			for( size_t i = 0 ; i != faces.size() ; i++){
+				glVertex3f( pts[faces[i].index[2]].x , pts[faces[i].index[2]].y , pts[faces[i].index[2]].z );
+				glVertex3f( pts[faces[i].index[1]].x , pts[faces[i].index[1]].y , pts[faces[i].index[1]].z );
+		
+				glVertex3f( pts[faces[i].index[1]].x , pts[faces[i].index[1]].y , pts[faces[i].index[1]].z );
+				glVertex3f( pts[faces[i].index[0]].x , pts[faces[i].index[0]].y , pts[faces[i].index[0]].z );
+		
+				glVertex3f( pts[faces[i].index[0]].x , pts[faces[i].index[0]].y , pts[faces[i].index[0]].z );
+				glVertex3f( pts[faces[i].index[2]].x , pts[faces[i].index[2]].y , pts[faces[i].index[2]].z );
+			
+			}
+		glEnd();
+	}
+	glDisable( GL_POLYGON_OFFSET_LINE );
+
+	if( b_draw_faces ){
+		glBegin(GL_TRIANGLES);
+			for( size_t i = 0 ; i != faces.size() ; i++){
+				glColor3f(1.0f,0.0f,0.0f);
+				glVertex3f( pts[faces[i].index[2]].x , pts[faces[i].index[2]].y , pts[faces[i].index[2]].z );
+				glColor3f(1.0f,0.0f,1.0f);	
+				glVertex3f( pts[faces[i].index[1]].x , pts[faces[i].index[1]].y , pts[faces[i].index[1]].z );
+				glColor3f(0.0f,0.0f,1.0f);	
+				glVertex3f( pts[faces[i].index[0]].x , pts[faces[i].index[0]].y , pts[faces[i].index[0]].z );
+			}
+		glEnd();
+	}
+}
 
 void ObjObject::showBoundingBox(){
-	float minX,minY,minZ;
-	float maxX,maxY,maxZ;
-	minX = scale_x * minv[0];
-	minY = scale_y * minv[1];
-	minZ = scale_z * minv[2];
+	glBegin(GL_LINE_LOOP);
+	glVertex3f( minv[0] , minv[1] , minv[2] );
+	glVertex3f( minv[0] , minv[1] , maxv[2] );
+	glVertex3f( maxv[0] , minv[1] , maxv[2] );
+	glVertex3f( maxv[0] , minv[1] , minv[2] );
+	glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex3f( minv[0] , maxv[1] , minv[2] );
+	glVertex3f( minv[0] , maxv[1] , maxv[2] );
+	glVertex3f( maxv[0] , maxv[1] , maxv[2] );
+	glVertex3f( maxv[0] , maxv[1] , minv[2] );
+	glEnd();
 	
-	maxX = scale_x * maxv[0];
-	maxY = scale_y * maxv[1];
-	maxZ = scale_z * maxv[2];
+	glBegin(GL_LINES);
+	glVertex3f( minv[0] , minv[1] , minv[2] );
+	glVertex3f( minv[0] , maxv[1] , minv[2] );
 
-	glBegin(GL_LINE_LOOP);
-	glVertex3f( minX , minY , minZ );
-	glVertex3f( minX , minY , maxZ );
-	glVertex3f( maxX , minY , maxZ );
-	glVertex3f( maxX , minY , minZ );
+	glVertex3f( minv[0] , minv[1] , maxv[2] );
+	glVertex3f( minv[0] , maxv[1] , maxv[2] );
 
-	glBegin(GL_LINE_LOOP);
-	glVertex3f( minX , minY , minZ );
-	glVertex3f( minX , minY , minZ );
-	glVertex3f( minX , minY , minZ );
-	glVertex3f( minX , minY , minZ );
+	glVertex3f( maxv[0] , minv[1] , maxv[2] );
+	glVertex3f( maxv[0] , maxv[1] , maxv[2] );
 
-
-	glVertex3f( minX , minY , minZ );
-	glVertex3f( minX , minY , minZ );
-	glVertex3f( minX , minY , minZ );
-	glVertex3f( minX , minY , minZ );
+	glVertex3f( maxv[0] , minv[1] , minv[2] );
+	glVertex3f( maxv[0] , maxv[1] , minv[2] );
 	glEnd();
 }

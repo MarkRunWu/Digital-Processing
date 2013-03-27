@@ -25,7 +25,16 @@ public:
 	vector<FACEINDEX>* getFaces();
 	void ToUnit();
 	void showBoundingBox();
+	void draw();
+	bool setDrawPoints(bool b){ b_draw_points = b; return b;}
+	bool setDrawLines(bool b){ b_draw_lines = b; return b;}
+	bool setDrawFaces(bool b){ b_draw_faces = b; return b;}
 private:
+	bool b_draw_points;
+	bool b_draw_lines;
+	bool b_draw_faces;
+	float line_color[4];
+	float face_color[4];
 	const char* readline( FILE* fin);
 	int parseText( const char* text );
 	void getPoint(const char* txt ,  float *x , float *y , float *z );

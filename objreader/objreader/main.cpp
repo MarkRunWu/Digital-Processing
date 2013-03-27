@@ -85,49 +85,15 @@ void ChangeSize(int w, int h)
 void RenderScene(void)
 {// Clear the window with current clearing color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);			
-	vector<POINT>* pPts = obj.getPoints();
-	vector<FACEINDEX>* pFace = obj.getFaces();
-
-
+	
+	
 	//顯示頂點POINTS	
 	glPointSize(5.0f);
 	glPushMatrix();
 	//glTranslatef( -0.5,-0.5,-0.5);
-	glBegin(GL_POINTS);	
-		for( size_t i = 0 ; i != (*pPts).size(); i++ ){
-			glVertex3f( (*pPts)[i].x , (*pPts)[i].y , (*pPts)[i].z );
-		}
-	glEnd();
-		
-	//顯示線條LINES
-	glLineWidth(1.0);
-	glEnable( GL_POLYGON_OFFSET_LINE );
-	glPolygonOffset( -1.5 , -1.5 );
-	glBegin(GL_LINES);
-		glColor3fv(Line_color);
-		for( size_t i = 0 ; i != (*pFace).size() ; i++){
-			glVertex3f( (*pPts)[(*pFace)[i].index[2]].x , (*pPts)[(*pFace)[i].index[2]].y , (*pPts)[(*pFace)[i].index[2]].z );
-			glVertex3f( (*pPts)[(*pFace)[i].index[1]].x , (*pPts)[(*pFace)[i].index[1]].y , (*pPts)[(*pFace)[i].index[1]].z );
-		
-			glVertex3f( (*pPts)[(*pFace)[i].index[1]].x , (*pPts)[(*pFace)[i].index[1]].y , (*pPts)[(*pFace)[i].index[1]].z );
-			glVertex3f( (*pPts)[(*pFace)[i].index[0]].x , (*pPts)[(*pFace)[i].index[0]].y , (*pPts)[(*pFace)[i].index[0]].z );
-		
-			glVertex3f( (*pPts)[(*pFace)[i].index[0]].x , (*pPts)[(*pFace)[i].index[0]].y , (*pPts)[(*pFace)[i].index[0]].z );
-			glVertex3f( (*pPts)[(*pFace)[i].index[2]].x , (*pPts)[(*pFace)[i].index[2]].y , (*pPts)[(*pFace)[i].index[2]].z );
-			
-		}
-	glEnd();
-	glDisable( GL_POLYGON_OFFSET_LINE );
-	glBegin(GL_TRIANGLES);
-		for( size_t i = 0 ; i != (*pFace).size() ; i++){
-			glColor3f(1.0f,0.0f,0.0f);
-			glVertex3f( (*pPts)[(*pFace)[i].index[2]].x , (*pPts)[(*pFace)[i].index[2]].y , (*pPts)[(*pFace)[i].index[2]].z );
-			glColor3f(1.0f,0.0f,1.0f);	
-			glVertex3f( (*pPts)[(*pFace)[i].index[1]].x , (*pPts)[(*pFace)[i].index[1]].y , (*pPts)[(*pFace)[i].index[1]].z );
-			glColor3f(0.0f,0.0f,1.0f);	
-			glVertex3f( (*pPts)[(*pFace)[i].index[0]].x , (*pPts)[(*pFace)[i].index[0]].y , (*pPts)[(*pFace)[i].index[0]].z );
-		}
-	glEnd();
+	obj.draw();
+	obj.showBoundingBox();
+
 	glPopMatrix();
 	/*
 	//顯示文字訊息
@@ -248,7 +214,7 @@ void menu(int item){	//主要參考 http://stackoverflow.com/questions/14370/glut-po
 int main(int argc, char* argv[])
 {
 	glutInit(&argc, argv);
-	const char* default_file = "teapot(3).obj";
+	const char* default_file = "../../teapot.obj";
 	if( argc >= 2 )default_file = argv[1];
 	obj.loadFile(default_file);
 	obj.ToUnit();
