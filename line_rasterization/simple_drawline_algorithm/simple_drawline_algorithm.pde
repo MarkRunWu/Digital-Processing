@@ -1,0 +1,207 @@
+int begin_pt[] = new int[2];
+int end_pt[] = new int[2];
+int count = 0;
+void setup(){
+  size(520,520);
+  textSize(16);
+  background(127);
+  fill(0);
+  ScreenPixelLabels(25,25,20);
+  
+  translate(20,20);
+  ScreenPixels( 25 , 25 , 20 );
+ /* 
+  if( count > 0 ){
+    writePixels( begin_pt[0] , begin_pt[1] , 20 );
+    if( count > 1){
+      writePixels( end_pt[0] , end_pt[1] , 20 );
+      draw_line( begin_pt , end_pt );
+    }
+  }
+ */
+  /***draw test
+        \    2 | 1   /
+       3  \    |   / 0
+       ______\_| /________
+        4    / | \   7
+          /    |    \
+        /  5   |  6   \
+  */
+  testCase07();
+  //testCase16();
+}
+void writePixels( int x , int y , float r ){
+  print( x + "," + y );
+  ellipse(  x*r + 0.5*r , y*r + 0.5*r , r , r );
+}
+
+void ScreenPixelLabels(int cols, int rows , float r){
+  textAlign(LEFT);
+  for( int i = 0 ; i != cols ; i++ )
+    text( i , r + i*r , r );
+  textAlign(CENTER);
+  for( int i = 0 ; i != rows ; i++ )
+    text( i , 0.5*r , 2*r + i*r );
+}
+void ScreenPixels(int cols , int rows , float r){
+  fill( 255);
+  float hr = 0.5*r;
+  for( int i = 0 ; i != cols ; i++ )
+    for( int j = 0 ; j != rows ; j++ )
+      ellipse( i*r + hr , j*r + hr , r , r );
+}
+void draw_line(int p0[] , int p1[]){
+  //dx
+  //dy
+  //d
+  //init d 
+  //case 1
+  //if d > 0 ne , +a+b
+  //if d < 0 e , +b
+  //..
+  /*** y = mx + b 
+  -> dx*y = dy*x + b 
+  -> dx*y - dy*x - b = 0
+  */
+  int step = 1;
+  int step2 = 1; // y axis: -1
+  int sign = 1;
+  int d;
+  int delE;
+  int delNE;
+  int dy = p1[1] - p0[1];
+  int dx = p1[0] - p0[0];
+  int condition = p1[0];
+  boolean reverse = false;
+  int tx = p0[0];
+  int ty = p0[1]; 
+  
+  if(dy < 0){ // case 6 7
+     dy = -dy;
+     step = -1;
+  }
+  
+  if( dy < dx ){ // when slop is smaller
+    d = 2*dy - dx;
+    delE = 2*dy;
+    delNE = 2*(dy - dx);  
+  }else{ // when slop is larger
+    step2 = step; // if dy < 0 , -1
+    int tmp = ty;
+    ty = tx;
+    tx = tmp;
+    condition = p1[1];
+    reverse = true;
+    sign = -1;
+    
+    d = dy - 2*dx;
+    delE = -2*dx;
+    delNE = 2*( dy - dx);  
+  }
+  
+  if( reverse ) writePixels(ty,tx,20);
+  else writePixels(tx,ty,20);
+  
+  while( step2*tx < step2*condition  ){
+    print( "=>" );
+    if( sign*d > 0 ){ //NE
+      d += delNE;
+      ty+=step2*step;   
+    }else{ // E
+      d += delE;
+    }
+    tx += step2;
+    if( reverse ) writePixels(ty,tx,20);
+    else writePixels(tx,ty,20);
+  }
+  println();
+}
+/***draw test
+        \    2 | 1   /
+       3  \    |   / 0
+       ______\_| /________
+        4    / | \   7
+          /    |    \
+        /  5   |  6   \
+  */
+
+void draw(){
+  /*
+  background(127);
+  fill(0);
+  ScreenPixelLabels(25,25,20);
+  
+  translate(20,20);
+  ScreenPixels( 25 , 25 , 20 );
+ /* 
+  if( count > 0 ){
+    writePixels( begin_pt[0] , begin_pt[1] , 20 );
+    if( count > 1){
+      writePixels( end_pt[0] , end_pt[1] , 20 );
+      draw_line( begin_pt , end_pt );
+    }
+  }
+ */
+  //testCase07();
+  //testCase16();
+}
+void mousePressed(){
+  if( count >= 2 )count = 0;
+  if( count == 0 ){
+   begin_pt[0] = mouseX;
+   begin_pt[1] = mouseY;
+   begin_pt[0] /= 20;
+   begin_pt[1] /= 20;
+  }else{
+    end_pt[0] = mouseX;
+    end_pt[1] = mouseY;
+   end_pt[0] /= 20;
+   end_pt[1] /= 20;
+  }
+  count++;
+}
+
+void testCase07(){
+  //case 0,7
+  
+  fill( 255,255,0);
+  begin_pt[0] = 0; begin_pt[1] = 10;
+  end_pt[0] = 10; end_pt[1] = 5;
+  draw_line( begin_pt , end_pt );
+  
+  begin_pt[0] = 0; begin_pt[1] = 10;
+  end_pt[0] = 20; end_pt[1] = 5;
+  draw_line( begin_pt , end_pt );
+  
+  fill( 255,0,0);
+  begin_pt[0] = 0; begin_pt[1] = 0;
+  end_pt[0] = 10; end_pt[1] = 25;
+  draw_line( begin_pt , end_pt );
+  
+  begin_pt[0] = 0; begin_pt[1] = 0;
+  end_pt[0] = 10; end_pt[1] = 5;
+  draw_line( begin_pt , end_pt );
+}
+
+void testCase16(){
+   //case 1,6
+  fill( 255,255,0);
+  begin_pt[0] = 11; begin_pt[1] = 10;
+  end_pt[0] = 12; end_pt[1] = 0;
+  draw_line( begin_pt , end_pt );
+  
+  begin_pt[0] = 13; begin_pt[1] = 20;
+  end_pt[0] = 15; end_pt[1] = 0;
+  draw_line( begin_pt , end_pt );
+  
+  fill( 255,0,0);
+  
+  begin_pt[0] = 0; begin_pt[1] = 0;
+  end_pt[0] = 5; end_pt[1] = 10;
+  draw_line( begin_pt , end_pt );
+  
+  begin_pt[0] = 11; begin_pt[1] = 0;
+  end_pt[0] = 12; end_pt[1] = 10;
+  draw_line( begin_pt , end_pt );
+  
+}
