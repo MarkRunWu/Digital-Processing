@@ -1,56 +1,66 @@
 int begin_pt[] = new int[2];
 int end_pt[] = new int[2];
 int count = 0;
-void setup(){
-  size(520,520);
+void setup() {
+  size(520, 520);
   textSize(16);
   background(127);
   fill(0);
-  ScreenPixelLabels(25,25,20);
-  
-  translate(20,20);
-  ScreenPixels( 25 , 25 , 20 );
- /* 
-  if( count > 0 ){
-    writePixels( begin_pt[0] , begin_pt[1] , 20 );
-    if( count > 1){
-      writePixels( end_pt[0] , end_pt[1] , 20 );
-      draw_line( begin_pt , end_pt );
-    }
-  }
- */
+  ScreenPixelLabels(25, 25, 20);
+
+  translate(20, 20);
+  ScreenPixels( 25, 25, 20 );
+  /* 
+   if( count > 0 ){
+   writePixels( begin_pt[0] , begin_pt[1] , 20 );
+   if( count > 1){
+   writePixels( end_pt[0] , end_pt[1] , 20 );
+   draw_line( begin_pt , end_pt );
+   }
+   }
+   */
   /***draw test
-        \    2 | 1   /
-       3  \    |   / 0
-       ______\_| /________
-        4    / | \   7
-          /    |    \
-        /  5   |  6   \
-  */
+   \    2 | 1   /
+   3  \    |   / 0
+   ______\_| /________
+   4    / | \   7
+   /    |    \
+   /  5   |  6   \
+   */
   testCase07();
-  //testCase16();
+  testCase16();
+  testCase34();
+  testCase25();
 }
-void writePixels( int x , int y , float r ){
-  print( x + "," + y );
-  ellipse(  x*r + 0.5*r , y*r + 0.5*r , r , r );
+void writePixels( int x, int y, float r ) {
+  ellipse(  x*r + 0.5*r, y*r + 0.5*r, r, r );
 }
 
-void ScreenPixelLabels(int cols, int rows , float r){
+void ScreenPixelLabels(int cols, int rows, float r) {
   textAlign(LEFT);
-  for( int i = 0 ; i != cols ; i++ )
-    text( i , r + i*r , r );
+  for ( int i = 0 ; i != cols ; i++ )
+    text( i, r + i*r, r );
   textAlign(CENTER);
-  for( int i = 0 ; i != rows ; i++ )
-    text( i , 0.5*r , 2*r + i*r );
+  for ( int i = 0 ; i != rows ; i++ )
+    text( i, 0.5*r, 2*r + i*r );
 }
-void ScreenPixels(int cols , int rows , float r){
+void ScreenPixels(int cols, int rows, float r) {
   fill( 255);
   float hr = 0.5*r;
-  for( int i = 0 ; i != cols ; i++ )
-    for( int j = 0 ; j != rows ; j++ )
-      ellipse( i*r + hr , j*r + hr , r , r );
+  for ( int i = 0 ; i != cols ; i++ )
+    for ( int j = 0 ; j != rows ; j++ )
+      ellipse( i*r + hr, j*r + hr, r, r );
 }
-void draw_line(int p0[] , int p1[]){
+
+/***
+ \    2 | 1   /
+ 3  \    |   / 0
+ ______\_| /________
+ 4    / | \   7
+ /    |    \
+ /  5   |  6   \
+ */
+void draw_line(int p0[], int p1[]) {
   //dx
   //dy
   //d
@@ -60,11 +70,13 @@ void draw_line(int p0[] , int p1[]){
   //if d < 0 e , +b
   //..
   /*** y = mx + b 
-  -> dx*y = dy*x + b 
-  -> dx*y - dy*x - b = 0
-  */
+   -> dx*y = dy*x + b 
+   -> dx*y - dy*x - b = 0
+   */
   int step = 1;
   int step2 = 1; // y axis: -1
+  int step3 = 1;
+  
   int sign = 1;
   int d;
   int delE;
@@ -75,17 +87,23 @@ void draw_line(int p0[] , int p1[]){
   boolean reverse = false;
   int tx = p0[0];
   int ty = p0[1]; 
-  
-  if(dy < 0){ // case 6 7
-     dy = -dy;
-     step = -1;
+
+  if (dy < 0) { // case 6 7
+    dy = -dy;
+    step = -1;
   }
-  
-  if( dy < dx ){ // when slop is smaller
-    d = 2*dy - dx;
-    delE = 2*dy;
-    delNE = 2*(dy - dx);  
-  }else{ // when slop is larger
+  if (dx < 0) {
+    step2 = -1;
+    step3 = -1;
+    sign = -1;
+  }
+
+  if ( abs(dy) < abs(dx) ) { // when slop is smaller
+    d = 2*step2*dy - dx;
+    delE = 2*step2*dy;
+    delNE = 2*(step2*dy - dx);
+  }
+  else { // when slop is larger
     step2 = step; // if dy < 0 , -1
     int tmp = ty;
     ty = tx;
@@ -93,115 +111,178 @@ void draw_line(int p0[] , int p1[]){
     condition = p1[1];
     reverse = true;
     sign = -1;
-    
+
     d = dy - 2*dx;
     delE = -2*dx;
-    delNE = 2*( dy - dx);  
+    delNE = 2*( step3*dy - dx);
   }
-  
-  if( reverse ) writePixels(ty,tx,20);
-  else writePixels(tx,ty,20);
-  
-  while( step2*tx < step2*condition  ){
+
+  if ( reverse ) {
+    writePixels(ty, tx, 20);
+    print( ty + "," + tx );
+  }
+  else {
+    writePixels(tx, ty, 20);
+    print( tx + "," + ty );
+  }
+
+  while ( step2*tx < step2*condition  ) {
     print( "=>" );
-    if( sign*d > 0 ){ //NE
+    if ( sign*d > 0 ) { //NE
       d += delNE;
-      ty+=step2*step;   
-    }else{ // E
+      ty+=step*step2*step3;
+    }
+    else { // E
       d += delE;
     }
     tx += step2;
-    if( reverse ) writePixels(ty,tx,20);
-    else writePixels(tx,ty,20);
-  }
-  println();
-}
-/***draw test
-        \    2 | 1   /
-       3  \    |   / 0
-       ______\_| /________
-        4    / | \   7
-          /    |    \
-        /  5   |  6   \
-  */
-
-void draw(){
-  /*
-  background(127);
-  fill(0);
-  ScreenPixelLabels(25,25,20);
-  
-  translate(20,20);
-  ScreenPixels( 25 , 25 , 20 );
- /* 
-  if( count > 0 ){
-    writePixels( begin_pt[0] , begin_pt[1] , 20 );
-    if( count > 1){
-      writePixels( end_pt[0] , end_pt[1] , 20 );
-      draw_line( begin_pt , end_pt );
+    if ( reverse ) {
+      writePixels(ty, tx, 20);
+      print( ty + "," + tx );
+    }
+    else {
+      writePixels(tx, ty, 20);
+      print( tx + "," + ty );
     }
   }
- */
+  if (reverse)println(", result: " + (tx == p1[1] && ty == p1[0]) );
+  else println(", result: " + (tx == p1[0] && ty == p1[1]) );
+  fill(0);
+  writePixels( p0[0], p0[1], 20);
+  fill(0);
+  writePixels( p1[0], p1[1], 20);
+}
+
+
+void draw() {
+  /*
+  background(127);
+   fill(0);
+   ScreenPixelLabels(25,25,20);
+   
+   translate(20,20);
+   ScreenPixels( 25 , 25 , 20 );
+  /* 
+   if( count > 0 ){
+   writePixels( begin_pt[0] , begin_pt[1] , 20 );
+   if( count > 1){
+   writePixels( end_pt[0] , end_pt[1] , 20 );
+   draw_line( begin_pt , end_pt );
+   }
+   }
+   */
   //testCase07();
   //testCase16();
 }
-void mousePressed(){
-  if( count >= 2 )count = 0;
-  if( count == 0 ){
-   begin_pt[0] = mouseX;
-   begin_pt[1] = mouseY;
-   begin_pt[0] /= 20;
-   begin_pt[1] /= 20;
-  }else{
+void mousePressed() {
+  if ( count >= 2 )count = 0;
+  if ( count == 0 ) {
+    begin_pt[0] = mouseX;
+    begin_pt[1] = mouseY;
+    begin_pt[0] /= 20;
+    begin_pt[1] /= 20;
+  }
+  else {
     end_pt[0] = mouseX;
     end_pt[1] = mouseY;
-   end_pt[0] /= 20;
-   end_pt[1] /= 20;
+    end_pt[0] /= 20;
+    end_pt[1] /= 20;
   }
   count++;
 }
 
-void testCase07(){
+void testCase07() {
   //case 0,7
-  
-  fill( 255,255,0);
-  begin_pt[0] = 0; begin_pt[1] = 10;
-  end_pt[0] = 10; end_pt[1] = 5;
-  draw_line( begin_pt , end_pt );
-  
-  begin_pt[0] = 0; begin_pt[1] = 10;
-  end_pt[0] = 20; end_pt[1] = 5;
-  draw_line( begin_pt , end_pt );
-  
-  fill( 255,0,0);
-  begin_pt[0] = 0; begin_pt[1] = 0;
-  end_pt[0] = 10; end_pt[1] = 25;
-  draw_line( begin_pt , end_pt );
-  
-  begin_pt[0] = 0; begin_pt[1] = 0;
-  end_pt[0] = 10; end_pt[1] = 5;
-  draw_line( begin_pt , end_pt );
+  println( "case 07: ");
+  fill( 255, 255, 0);
+  begin_pt[0] = 0; 
+  begin_pt[1] = 10;
+  end_pt[0] = 10; 
+  end_pt[1] = 5;
+  draw_line( begin_pt, end_pt );
+  fill( 255, 255, 0);
+  begin_pt[0] = 0; 
+  begin_pt[1] = 10;
+  end_pt[0] = 20; 
+  end_pt[1] = 5;
+  draw_line( begin_pt, end_pt );
+
+  fill( 255, 0, 0);
+  begin_pt[0] = 0; 
+  begin_pt[1] = 0;
+  end_pt[0] = 10; 
+  end_pt[1] = 25;
+  draw_line( begin_pt, end_pt );
+  fill( 255, 0, 0);
+  begin_pt[0] = 0; 
+  begin_pt[1] = 0;
+  end_pt[0] = 10; 
+  end_pt[1] = 5;
+  draw_line( begin_pt, end_pt );
 }
 
-void testCase16(){
-   //case 1,6
-  fill( 255,255,0);
-  begin_pt[0] = 11; begin_pt[1] = 10;
-  end_pt[0] = 12; end_pt[1] = 0;
-  draw_line( begin_pt , end_pt );
-  
-  begin_pt[0] = 13; begin_pt[1] = 20;
-  end_pt[0] = 15; end_pt[1] = 0;
-  draw_line( begin_pt , end_pt );
-  
-  fill( 255,0,0);
-  
-  begin_pt[0] = 0; begin_pt[1] = 0;
-  end_pt[0] = 5; end_pt[1] = 10;
-  draw_line( begin_pt , end_pt );
-  
-  begin_pt[0] = 11; begin_pt[1] = 0;
-  end_pt[0] = 12; end_pt[1] = 10;
-  draw_line( begin_pt , end_pt );
+void testCase16() {
+  println( "case 16: ");
+  //case 1,6
+  fill( 255, 255, 0);
+  begin_pt[0] = 11; 
+  begin_pt[1] = 10;
+  end_pt[0] = 12; 
+  end_pt[1] = 0;
+  draw_line( begin_pt, end_pt );
+  fill( 255, 255, 0);
+  begin_pt[0] = 13; 
+  begin_pt[1] = 20;
+  end_pt[0] = 15; 
+  end_pt[1] = 0;
+  draw_line( begin_pt, end_pt );
+
+  fill( 255, 0, 0);
+
+  begin_pt[0] = 0; 
+  begin_pt[1] = 0;
+  end_pt[0] = 5; 
+  end_pt[1] = 10;
+  draw_line( begin_pt, end_pt );
+
+  fill( 255, 0, 0);
+  begin_pt[0] = 11; 
+  begin_pt[1] = 0;
+  end_pt[0] = 12; 
+  end_pt[1] = 10;
+  draw_line( begin_pt, end_pt );
+}
+
+void testCase34() {
+  println( "case 34: ");
+  fill( 255, 255, 0 );
+  begin_pt[0] = 10; 
+  begin_pt[1] = 6;
+  end_pt[0] = 5; 
+  end_pt[1] = 5;
+  draw_line( begin_pt, end_pt );
+  fill( 255, 0, 0 );
+  begin_pt[0] = 10; 
+  begin_pt[1] = 7;
+  end_pt[0] = 5; 
+  end_pt[1] = 10;
+  draw_line( begin_pt, end_pt );
+}
+
+void testCase25() {
+  println( "case 25: ");
+  fill( 255, 255, 0 );
+  begin_pt[0] = 5; 
+  begin_pt[1] = 10;
+  end_pt[0] = 2; 
+  end_pt[1] = 5;
+  draw_line( begin_pt, end_pt );
+  fill( 255, 0, 0 );
+  begin_pt[0] = 6; 
+  begin_pt[1] = 2;
+  end_pt[0] = 5; 
+  end_pt[1] = 10;
+  draw_line( begin_pt, end_pt );
   
 }
+
