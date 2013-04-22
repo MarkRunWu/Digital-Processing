@@ -28,9 +28,9 @@ void setup() {
    /  5   |  6   \
    */
   testCase07();
-  testCase16();
+  //testCase16();
   testCase34();
-  testCase25();
+  //testCase25();
 }
 void writePixels( int x, int y, float r ) {
   ellipse(  x*r + 0.5*r, y*r + 0.5*r, r, r );
@@ -60,7 +60,7 @@ void ScreenPixels(int cols, int rows, float r) {
  /    |    \
  /  5   |  6   \
  */
-void draw_line(int p0[], int p1[]) {
+void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
   //dx
   //dy
   //d
@@ -81,36 +81,35 @@ void draw_line(int p0[], int p1[]) {
   int d;
   int delE;
   int delNE;
-  int dy = p1[1] - p0[1];
-  int dx = p1[0] - p0[0];
-  int condition = p1[0];
+  int dy = Py1 - Py0;
+  int dx = Px1 - Px0;
+  int condition = Px1;
+  float m = dy / (float)dx;
   boolean reverse = false;
-  int tx = p0[0];
-  int ty = p0[1]; 
-
+  int tx = Px0;
+  int ty = Py0; 
+  
   if (dy < 0) { // case 6 7
-    dy = -dy;
+    //dy = -dy;
     step = -1;
   }
   if (dx < 0) {
-    step2 = -1;
-    step3 = -1;
     sign = -1;
+    step2 = -1;
   }
-
-  if ( abs(dy) < abs(dx) ) { // when slop is smaller
-    d = 2*step2*dy - dx;
-    delE = 2*step2*dy;
-    delNE = 2*(step2*dy - dx);
-  }
-  else { // when slop is larger
+  
+  if ( abs(dy) < abs(dx) ){ // when slop is smaller
+    d = 2*step2*step*dy - step2*dx;
+    delE = 2*step2*step*dy;
+    delNE = 2*step2*(step*dy - dx);
+  }else { // when slop is larger
     step2 = step; // if dy < 0 , -1
     int tmp = ty;
     ty = tx;
     tx = tmp;
-    condition = p1[1];
+    condition = Py1;
     reverse = true;
-    sign = -1;
+    //sign = -1;
 
     d = dy - 2*dx;
     delE = -2*dx;
@@ -125,32 +124,42 @@ void draw_line(int p0[], int p1[]) {
     writePixels(tx, ty, 20);
     print( tx + "," + ty );
   }
-
-  while ( step2*tx < step2*condition  ) {
+  float f;
+  float y = ty;
+  while ( tx < condition  ) {
     print( "=>" );
     if ( sign*d > 0 ) { //NE
       d += delNE;
-      ty+=step*step2*step3;
+      ty += step;
     }
     else { // E
       d += delE;
     }
     tx += step2;
+    f =  y - (int)y;
     if ( reverse ) {
+      fill( 255*f );
       writePixels(ty, tx, 20);
+      fill( 255*(1-f) );
+      writePixels(ty + 1, tx , 20);
+      y += m;
       print( ty + "," + tx );
     }
     else {
+      fill( 255*f );
       writePixels(tx, ty, 20);
+      fill( 255*(1 - f) );
+      writePixels(tx, ty + 1 , 20);
+      y += m;
       print( tx + "," + ty );
     }
   }
-  if (reverse)println(", result: " + (tx == p1[1] && ty == p1[0]) );
-  else println(", result: " + (tx == p1[0] && ty == p1[1]) );
+  if (reverse)println(", result: " + (tx == Py1 && ty == Px1) );
+  else println(", result: " + (tx == Px1 && ty == Py1) );
   fill(0);
-  writePixels( p0[0], p0[1], 20);
+  writePixels( Px0, Py0, 20);
   fill(0);
-  writePixels( p1[0], p1[1], 20);
+  writePixels( Px1, Py1, 20);
 }
 
 
@@ -199,26 +208,26 @@ void testCase07() {
   begin_pt[1] = 10;
   end_pt[0] = 10; 
   end_pt[1] = 5;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
   fill( 255, 255, 0);
   begin_pt[0] = 0; 
   begin_pt[1] = 10;
   end_pt[0] = 20; 
   end_pt[1] = 5;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
 
   fill( 255, 0, 0);
   begin_pt[0] = 0; 
   begin_pt[1] = 0;
   end_pt[0] = 10; 
   end_pt[1] = 25;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
   fill( 255, 0, 0);
   begin_pt[0] = 0; 
   begin_pt[1] = 0;
   end_pt[0] = 10; 
   end_pt[1] = 5;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
 }
 
 void testCase16() {
@@ -229,13 +238,13 @@ void testCase16() {
   begin_pt[1] = 10;
   end_pt[0] = 12; 
   end_pt[1] = 0;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
   fill( 255, 255, 0);
   begin_pt[0] = 13; 
   begin_pt[1] = 20;
   end_pt[0] = 15; 
   end_pt[1] = 0;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
 
   fill( 255, 0, 0);
 
@@ -243,14 +252,14 @@ void testCase16() {
   begin_pt[1] = 0;
   end_pt[0] = 5; 
   end_pt[1] = 10;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
 
   fill( 255, 0, 0);
   begin_pt[0] = 11; 
   begin_pt[1] = 0;
   end_pt[0] = 12; 
   end_pt[1] = 10;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
 }
 
 void testCase34() {
@@ -260,13 +269,13 @@ void testCase34() {
   begin_pt[1] = 6;
   end_pt[0] = 5; 
   end_pt[1] = 5;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
   fill( 255, 0, 0 );
   begin_pt[0] = 10; 
   begin_pt[1] = 7;
   end_pt[0] = 5; 
   end_pt[1] = 10;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
 }
 
 void testCase25() {
@@ -276,13 +285,13 @@ void testCase25() {
   begin_pt[1] = 10;
   end_pt[0] = 2; 
   end_pt[1] = 5;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
   fill( 255, 0, 0 );
   begin_pt[0] = 6; 
   begin_pt[1] = 2;
   end_pt[0] = 5; 
   end_pt[1] = 10;
-  draw_line( begin_pt, end_pt );
+  draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
   
 }
 
