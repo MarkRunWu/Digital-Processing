@@ -40,7 +40,7 @@ bool b_show_grid = true;
 bool b_log_file = false;
 void checkMenu();
 void drawGrid(int w , int h); // draw a grid start from (0,0)  with w and h size
-extern void MyLine(int Px0 , int Py0 , int Px1 , int Py1 , fstream & ,bool );
+extern void MyLine(int Px0 , int Py0 , int Px1 , int Py1 , bool );
 extern void MyPoint(int Px0 , int Py0 );
 fstream log_file;
 
@@ -121,8 +121,8 @@ void RenderScene(void)
 	if( end_pts.valid )
 		MyPoint( end_pts.x , end_pts.y );
 	if( start_pts.valid && end_pts.valid )
-		MyLine( start_pts.x , start_pts.y , end_pts.x , end_pts.y , log_file , b_log_file ); 
-
+		MyLine( start_pts.x , start_pts.y , end_pts.x , end_pts.y , false ); 
+	
 	glColor3f(0.0f,0.0f,0.0f);
 	if( b_show_grid )
 		drawGrid( GRID_W , GRID_H ); 
@@ -227,12 +227,10 @@ void menu(int item){	//主要參考 http://stackoverflow.com/questions/14370/glut-po
 			b_show_grid ^= 1;
 			break;
 		case MENU_LOG_FILE:
-			if( b_log_file ){
 				log_file.open( "log.txt" , fstream::out );
-			}
-			else
+				MyLine( start_pts.x , start_pts.y , end_pts.x , end_pts.y , true );
 				log_file.close();
-			b_log_file ^= 1;
+			
 	}
 	checkMenu();
 	glutPostRedisplay();
