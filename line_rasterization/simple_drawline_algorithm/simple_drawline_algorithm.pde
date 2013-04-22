@@ -28,9 +28,9 @@ void setup() {
    /  5   |  6   \
    */
   testCase07();
-  //testCase16();
+  testCase16();
   testCase34();
-  //testCase25();
+  testCase25();
 }
 void writePixels( int x, int y, float r ) {
   ellipse(  x*r + 0.5*r, y*r + 0.5*r, r, r );
@@ -61,23 +61,9 @@ void ScreenPixels(int cols, int rows, float r) {
  /  5   |  6   \
  */
 void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
-  //dx
-  //dy
-  //d
-  //init d 
-  //case 1
-  //if d > 0 ne , +a+b
-  //if d < 0 e , +b
-  //..
-  /*** y = mx + b 
-   -> dx*y = dy*x + b 
-   -> dx*y - dy*x - b = 0
-   */
   int step = 1;
   int step2 = 1; // y axis: -1
-  int step3 = 1;
-  
-  int sign = 1;
+  int s = 1;
   int d;
   int delE;
   int delNE;
@@ -89,33 +75,30 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
   int tx = Px0;
   int ty = Py0; 
   
-  if (dy < 0) { // case 6 7
-    //dy = -dy;
-    step = -1;
-  }
-  if (dx < 0) {
-    sign = -1;
-    step2 = -1;
-  }
   
-  if ( abs(dy) < abs(dx) ){ // when slop is smaller
-    d = 2*step2*step*dy - step2*dx;
-    delE = 2*step2*step*dy;
-    delNE = 2*step2*(step*dy - dx);
-  }else { // when slop is larger
-    step2 = step; // if dy < 0 , -1
-    int tmp = ty;
+  if ( abs(dy) > abs(dx) ){// when slop is larger
+    int tmp = dy;
+    dy = dx;
+    dx = tmp;
+    reverse = true;
+    tmp = ty;
     ty = tx;
     tx = tmp;
     condition = Py1;
-    reverse = true;
-    //sign = -1;
-
-    d = dy - 2*dx;
-    delE = -2*dx;
-    delNE = 2*( step3*dy - dx);
   }
-
+  if( dy < 0 ){
+    step = -1;
+  }
+  if( dx < 0 ){
+    step2 = -1;
+  }
+  if( dy * dx < 0 )
+    s = -1;
+    
+    d = 2*s*dy - dx;
+    delE = 2*s*dy;
+    delNE = 2*(s*dy - dx);
+    
   if ( reverse ) {
     writePixels(ty, tx, 20);
     print( ty + "," + tx );
@@ -126,9 +109,9 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
   }
   float f;
   float y = ty;
-  while ( tx < condition  ) {
+  while ( step2*tx < step2*condition  ) {
     print( "=>" );
-    if ( sign*d > 0 ) { //NE
+    if ( step2*d > 0 ) { //NE
       d += delNE;
       ty += step;
     }
@@ -138,21 +121,24 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
     tx += step2;
     f =  y - (int)y;
     if ( reverse ) {
-      fill( 255*f );
+      fill( f );
       writePixels(ty, tx, 20);
+      
       fill( 255*(1-f) );
-      writePixels(ty + 1, tx , 20);
-      y += m;
+      writePixels(ty + step, tx , 20);
+      
       print( ty + "," + tx );
     }
     else {
-      fill( 255*f );
+      fill( f );
       writePixels(tx, ty, 20);
+      
       fill( 255*(1 - f) );
-      writePixels(tx, ty + 1 , 20);
-      y += m;
+      writePixels(tx, ty + step , 20);
+      
       print( tx + "," + ty );
     }
+    y += m;
   }
   if (reverse)println(", result: " + (tx == Py1 && ty == Px1) );
   else println(", result: " + (tx == Px1 && ty == Py1) );
@@ -171,17 +157,18 @@ void draw() {
    
    translate(20,20);
    ScreenPixels( 25 , 25 , 20 );
-  /* 
+   
    if( count > 0 ){
    writePixels( begin_pt[0] , begin_pt[1] , 20 );
    if( count > 1){
    writePixels( end_pt[0] , end_pt[1] , 20 );
-   draw_line( begin_pt , end_pt );
+   draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
    }
    }
-   */
+  
   //testCase07();
   //testCase16();
+  */
 }
 void mousePressed() {
   if ( count >= 2 )count = 0;
