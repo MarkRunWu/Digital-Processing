@@ -1,6 +1,7 @@
 int begin_pt[] = new int[2];
 int end_pt[] = new int[2];
 int count = 0;
+float s = 1;
 void setup() {
   size(520, 520);
   textSize(16);
@@ -27,10 +28,10 @@ void setup() {
    /    |    \
    /  5   |  6   \
    */
-  testCase07();
-  testCase16();
-  testCase34();
-  testCase25();
+  //testCase07();
+  //testCase16();
+  //testCase34();
+  //testCase25();
 }
 void writePixels( int x, int y, float r ) {
   ellipse(  x*r + 0.5*r, y*r + 0.5*r, r, r );
@@ -70,7 +71,7 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
   int dy = Py1 - Py0;
   int dx = Px1 - Px0;
   int condition = Px1;
-  float m = dy / (float)dx;
+  float m;
   boolean reverse = false;
   int tx = Px0;
   int ty = Py0; 
@@ -108,34 +109,43 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
     print( tx + "," + ty );
   }
   float f;
-  float y = ty;
+  m = step*abs(dy / (float)dx);
+  float y = ty + m;
+  int caseNE;
   while ( step2*tx < step2*condition  ) {
     print( "=>" );
     if ( step2*d > 0 ) { //NE
       d += delNE;
       ty += step;
+      caseNE = step;
     }
     else { // E
       d += delE;
+      caseNE = -step;
     }
     tx += step2;
-    f =  y - (int)y;
+    
+    f =  abs( y - ty );
+    print( y );
+    print('\t');
+    print( f );
+    print('\t');
+    //if( f > 0.5 ) f = 1 - f;
     if ( reverse ) {
-      fill( f );
+      fill(255*f);
+      //fill(0);
       writePixels(ty, tx, 20);
-      
-      fill( 255*(1-f) );
-      writePixels(ty + step, tx , 20);
-      
+      fill(255*(1-f));
+      //fill(255,0,0);
+      writePixels(ty - caseNE, tx, 20);
       print( ty + "," + tx );
-    }
-    else {
-      fill( f );
+    }else {
+      fill(255*f);
+      //fill(0);
       writePixels(tx, ty, 20);
-      
-      fill( 255*(1 - f) );
-      writePixels(tx, ty + step , 20);
-      
+      fill(255*(1-f));
+      //fill(255,0,0);
+      writePixels(tx, ty - caseNE, 20);
       print( tx + "," + ty );
     }
     y += m;
@@ -146,15 +156,17 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
   writePixels( Px0, Py0, 20);
   fill(0);
   writePixels( Px1, Py1, 20);
+  stroke(255,0,0);
+  line( 10 + 20*begin_pt[0] , 10 + 20*begin_pt[1] , 10 + 20*end_pt[0] , 10 + 20*end_pt[1] );
+  stroke(0);
 }
 
 
 void draw() {
-  /*
+  scale(s);
   background(127);
    fill(0);
    ScreenPixelLabels(25,25,20);
-   
    translate(20,20);
    ScreenPixels( 25 , 25 , 20 );
    
@@ -163,12 +175,24 @@ void draw() {
    if( count > 1){
    writePixels( end_pt[0] , end_pt[1] , 20 );
    draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
+   stroke(255,0,0);
+  line( 10 + 20*begin_pt[0] , 10 + 20*begin_pt[1] , 10 + 20*end_pt[0] , 10 + 20*end_pt[1] );
+  stroke(0);
    }
    }
   
   //testCase07();
   //testCase16();
-  */
+  
+}
+void keyPressed(){
+  if( key == 's')
+    s -= 0.1;
+  if( key == 'S')
+    s += 0.1;
+   if( s < 0.1 ) s = 0.1;
+   if( s > 1 ) s = 1;
+   redraw();
 }
 void mousePressed() {
   if ( count >= 2 )count = 0;
@@ -196,6 +220,7 @@ void testCase07() {
   end_pt[0] = 10; 
   end_pt[1] = 5;
   draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
+
   fill( 255, 255, 0);
   begin_pt[0] = 0; 
   begin_pt[1] = 10;
@@ -232,7 +257,7 @@ void testCase16() {
   end_pt[0] = 15; 
   end_pt[1] = 0;
   draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
-
+/*
   fill( 255, 0, 0);
 
   begin_pt[0] = 0; 
@@ -247,6 +272,7 @@ void testCase16() {
   end_pt[0] = 12; 
   end_pt[1] = 10;
   draw_line( begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
+  */
 }
 
 void testCase34() {
