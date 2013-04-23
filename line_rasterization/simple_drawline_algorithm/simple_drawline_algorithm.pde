@@ -4,20 +4,23 @@ Remainder Requiremets:
   input fields x y
   log.txt - contains begin_pt and end_pt : a sequence points from begin_pt to end_pt
 */
+int region = 0;
+boolean enter_num = false;
+int enter_count = 0;
+int num;
 int begin_pt[] = new int[2];
 int end_pt[] = new int[2];
 int count = 0;
 float ss = 1;
 boolean b_log = false;
 boolean b_antialiasing = false;
-String log;
+
 PrintWriter file;
 void doLog(){
   b_log = true;
-  log = "";
   file = createWriter("log.txt");
+  file.println( "start: " + begin_pt[0] + "," + begin_pt[1] + ", end: " + end_pt[0] + "," + end_pt[1] );
   draw_line(  begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
-  file.print( log );
   file.flush();
   file.close();
   b_log = false;
@@ -25,14 +28,45 @@ void doLog(){
 
 void showTextMenu(){
   /* will fix later*/
+  fill(255);
+  rect( 590 , 0 , 200 , 20 );
+  if( enter_num && region == 0 )
+     fill(255,255,0);
+  else
+    fill(255);
+  rect( 590 , 20 , 100 , 30 );
+  if( enter_num && region == 1 )
+     fill(255,255,0);
+  else
+    fill(255);
+  rect( 690 , 20 , 100 , 30 );
+  if( enter_num && region == 2 )
+     fill(255,255,0);
+  else
+    fill(255);
+  rect( 590 , 50 , 100 , 30 );
+  if( enter_num && region == 3 )
+     fill(255,255,0);
+  else
+    fill(255);
+  rect( 690 , 50 , 100 , 30 );
+  
+  fill(0);
+  textAlign( LEFT , BOTTOM );
   stroke(255);
   String anti = "Anti-aliasing: " + (b_antialiasing ? "(Enable)" : "(Disable)");
-  text( anti , 10 , 10 );
+  text( anti , 600 ,  20 );
+
+  text( "X0: " + begin_pt[0] , 600 , 50 ); text( "Y0: " + begin_pt[1] , 700 , 50 );
+  text( "X1: " + end_pt[0], 600 , 80 ); text( "Y1: " + end_pt[1] , 700 , 80 );
+  
+  
+  
   stroke(0);
 }
 
 void setup() {
-  size(520, 520);
+  size(800, 600);
   if (frame!=null) frame.setResizable(true);
   textSize(16);
   
@@ -70,10 +104,10 @@ void writePixels( int x, int y, float r ) {
 }
 
 void ScreenPixelLabels(int cols, int rows, float r) {
-  textAlign(LEFT);
+  textAlign(CENTER , CENTER);
   for ( int i = 0 ; i != cols ; i++ )
-    text( i, r + i*r, r );
-  textAlign(CENTER);
+    text( i,  2*r + i*r , 0.5*r );
+  textAlign(CENTER , CENTER);
   for ( int i = 0 ; i != rows ; i++ )
     text( i, 0.5*r, 2*r + i*r );
 }
@@ -195,14 +229,7 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1 ) {
     }
     y += m;
   }
-  /*
-  if (reverse)println(", result: " + (tx == Py1 && ty == Px1) );
-  else println(", result: " + (tx == Px1 && ty == Py1) );
-  fill(0);
-  writePixels( Px0, Py0, 20);
-  fill(0);
-  writePixels( Px1, Py1, 20);
-  */
+ 
   stroke(255,0,0);
   line( 10 + 20*begin_pt[0] , 10 + 20*begin_pt[1] , 10 + 20*end_pt[0] , 10 + 20*end_pt[1] );
   stroke(0);
@@ -214,8 +241,9 @@ void draw() {
   pushMatrix();
   scale(ss);
    fill(0);
+   
    ScreenPixelLabels(25,25,20);
-   translate(20,20);
+   translate(25,25);
    ScreenPixels( 25 , 25 , 20 );
    
    if( count > 0 ){
@@ -248,7 +276,37 @@ void keyPressed(){
   if( key == 'a')
     b_antialiasing ^= true;
   if( key >= '0' && key <= '9' ){
+    if( !enter_num ){
+       enter_num = true;
+       num = 0;
+    }
+    
+    num  = num * 10 + (key - '0');
     print( key );
+    switch( region ){
+      case 0:
+        count = 0;
+        begin_pt[0] = num;
+        break;
+      case 1:
+        begin_pt[1] = num;
+        count += 1;
+        break;
+      case 2:
+        end_pt[0] = num;
+        break;
+      case 3:
+        end_pt[1] = num;
+        count += 1;
+        break;
+    }
+  }
+  if( key == ' '){
+    enter_count = 0;
+    
+    num = 0;
+    region = ( region + 1)%4; 
+    if( region == 0 ) enter_num = false;
   }
    redraw();
 }
