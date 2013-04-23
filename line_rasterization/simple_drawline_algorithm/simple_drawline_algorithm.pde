@@ -1,3 +1,9 @@
+/***
+Remainder Requiremets:
+  document - readme.pdf
+  input fields x y
+  log.txt - contains begin_pt and end_pt : a sequence points from begin_pt to end_pt
+*/
 int begin_pt[] = new int[2];
 int end_pt[] = new int[2];
 int count = 0;
@@ -241,7 +247,9 @@ void keyPressed(){
   }
   if( key == 'a')
     b_antialiasing ^= true;
-     
+  if( key >= '0' && key <= '9' ){
+    print( key );
+  }
    redraw();
 }
 void mousePressed() {
