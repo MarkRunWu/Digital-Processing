@@ -1,10 +1,35 @@
 int begin_pt[] = new int[2];
 int end_pt[] = new int[2];
 int count = 0;
-float s = 1;
+float ss = 1;
+boolean b_log = false;
+boolean b_antialiasing = false;
+String log;
+PrintWriter file;
+void doLog(){
+  b_log = true;
+  log = "";
+  file = createWriter("log.txt");
+  draw_line(  begin_pt[0] , begin_pt[1] , end_pt[0] , end_pt[1] );
+  file.print( log );
+  file.flush();
+  file.close();
+  b_log = false;
+}
+
+void showTextMenu(){
+  /* will fix later*/
+  stroke(255);
+  String anti = "Anti-aliasing: " + (b_antialiasing ? "(Enable)" : "(Disable)");
+  text( anti , 10 , 10 );
+  stroke(0);
+}
+
 void setup() {
   size(520, 520);
+  if (frame!=null) frame.setResizable(true);
   textSize(16);
+  
   background(127);
   fill(0);
   ScreenPixelLabels(25, 25, 20);
@@ -32,6 +57,7 @@ void setup() {
   //testCase16();
   //testCase34();
   //testCase25();
+  
 }
 void writePixels( int x, int y, float r ) {
   ellipse(  x*r + 0.5*r, y*r + 0.5*r, r, r );
@@ -61,7 +87,7 @@ void ScreenPixels(int cols, int rows, float r) {
  /    |    \
  /  5   |  6   \
  */
-void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
+void draw_line(int Px0 , int Py0 , int Px1 , int Py1 ) {
   int step = 1;
   int step2 = 1; // y axis: -1
   int s = 1;
@@ -75,7 +101,6 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
   boolean reverse = false;
   int tx = Px0;
   int ty = Py0; 
-  
   
   if ( abs(dy) > abs(dx) ){// when slop is larger
     int tmp = dy;
@@ -99,21 +124,29 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
     d = 2*s*dy - dx;
     delE = 2*s*dy;
     delNE = 2*(s*dy - dx);
-    
+  
+  fill(0);  
   if ( reverse ) {
-    writePixels(ty, tx, 20);
-    print( ty + "," + tx );
+    
+    if( b_log )
+      file.print( ty + "," + tx );
+    else
+      writePixels(ty, tx, 20); 
   }
   else {
-    writePixels(tx, ty, 20);
-    print( tx + "," + ty );
+    
+    if( b_log )
+      file.print( tx + "," + ty );
+    else
+      writePixels(tx, ty, 20);
   }
-  float f;
+  float f = 0;
   m = step*abs(dy / (float)dx);
   float y = ty + m;
   int caseNE;
   while ( step2*tx < step2*condition  ) {
-    print( "=>" );
+    if( b_log )
+      file.print(  "=>" );
     if ( step2*d > 0 ) { //NE
       d += delNE;
       ty += step;
@@ -125,37 +158,45 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
     }
     tx += step2;
     
-    f =  abs( y - ty );
-    print( y );
-    print('\t');
-    print( f );
-    print('\t');
+    if( b_antialiasing ){
+      f =  abs( y - ty );
+    }
+   
     //if( f > 0.5 ) f = 1 - f;
     if ( reverse ) {
       fill(255*f);
       //fill(0);
-      writePixels(ty, tx, 20);
-      fill(255*(1-f));
-      //fill(255,0,0);
-      writePixels(ty - caseNE, tx, 20);
-      print( ty + "," + tx );
+      if( b_log )
+        file.print( ty + "," + tx);  
+      else
+        writePixels(ty, tx, 20);
+      if( b_antialiasing ){
+        fill(255*(1-f));
+        writePixels(ty - caseNE, tx, 20);
+      }
+      
     }else {
       fill(255*f);
       //fill(0);
-      writePixels(tx, ty, 20);
-      fill(255*(1-f));
-      //fill(255,0,0);
-      writePixels(tx, ty - caseNE, 20);
-      print( tx + "," + ty );
+      if( b_log )
+        file.print( tx + "," + ty );
+      else
+        writePixels(tx, ty, 20);
+      if( b_antialiasing ){
+        fill(255*(1-f));
+        writePixels(tx, ty - caseNE, 20);
+      }
     }
     y += m;
   }
+  /*
   if (reverse)println(", result: " + (tx == Py1 && ty == Px1) );
   else println(", result: " + (tx == Px1 && ty == Py1) );
   fill(0);
   writePixels( Px0, Py0, 20);
   fill(0);
   writePixels( Px1, Py1, 20);
+  */
   stroke(255,0,0);
   line( 10 + 20*begin_pt[0] , 10 + 20*begin_pt[1] , 10 + 20*end_pt[0] , 10 + 20*end_pt[1] );
   stroke(0);
@@ -163,8 +204,9 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1) {
 
 
 void draw() {
-  scale(s);
   background(127);
+  pushMatrix();
+  scale(ss);
    fill(0);
    ScreenPixelLabels(25,25,20);
    translate(20,20);
@@ -180,18 +222,26 @@ void draw() {
   stroke(0);
    }
    }
-  
+  popMatrix();
   //testCase07();
   //testCase16();
-  
+  showTextMenu();
 }
 void keyPressed(){
   if( key == 's')
-    s -= 0.1;
+    ss -= 0.1;
   if( key == 'S')
-    s += 0.1;
-   if( s < 0.1 ) s = 0.1;
-   if( s > 1 ) s = 1;
+    ss += 0.1;
+  if( ss < 0.1 ) ss = 0.1;
+  if( ss > 1 ) ss = 1;
+  
+  if( key == 'w' ){
+     print( "saved to log file\n" ); 
+     doLog();
+  }
+  if( key == 'a')
+    b_antialiasing ^= true;
+     
    redraw();
 }
 void mousePressed() {
