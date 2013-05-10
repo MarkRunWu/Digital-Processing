@@ -13,23 +13,41 @@ boolean b_antialiasing = false;
 String log;
 PrintWriter file;
 ArrayList<PVector> triangle = new ArrayList<PVector>();
-
+PImage Image_NoAccept;
 class HalfSpaceMap{
   public void add(float[] es ){
     float copy_es [] = new float [es.length];
-    boolean b_pass = (copy_es[0] > 0);
-    for( int i = 0 ; i != es.length ; i++ ){
+    boolean t_diff = (es[0] > 0);
+    boolean f_diff = (es[0] < 0);
+    
+    for(int i = 0  ; i != es.length ; i++ ){
+      t_diff &= ( es[i] > 0 );
+      f_diff &= ( es[i] < 0 );
       copy_es[i] = es[i];
-      b_pass ^= ( copy_es[0] > 0 );
     }
-    b_maps.add( b_pass );
+    b_maps.add( t_diff | f_diff );
     maps.add( copy_es );
+  }
+  public void add(boolean passed ){
+    b_maps.add( passed );
   }
   public void clear(){
     maps.clear();
+    b_maps.clear();
   }
   public int size(){
     return maps.size();
+  }
+  public boolean is_passed(int x, int y){
+    if( x > (xmax - xmin) || x < 0 || y > (ymax - ymin) || y < 0 )
+      return false;
+    return is_passed( y * (int)(xmax - xmin + 1) + x );
+  }
+  public boolean is_passed(int index){
+    if( b_maps.size() > 0 && index >= 0 && index < b_maps.size() ){
+        return b_maps.get(index);
+    }
+    return false;
   }
   public float[] get(int index){
     if( maps.size() <= 0 || index < 0 || index > maps.size() )return null;
@@ -70,6 +88,23 @@ void doLog(){
   b_log = false;
 }
 
+boolean[] getAcceptMarker(int size){
+  int i = ( mouseX - 20*(int)maps.xmin - 20)/20;
+  int j = ( mouseY - 20*(int)maps.ymin - 20)/20;
+   
+  boolean results[] = new boolean[size];
+  for( int k = 0 ; k != size ; k++ )
+    results[k] = true;
+      
+  float[] p_detail = maps.get( i , j );
+  if( p_detail != null && !maps.is_passed( i , j ) ){
+      for(int k = 0 ; k != p_detail.length ; k++ ){
+        if(p_detail[k] >= 0)
+          results[k] = false;
+      }
+  }
+  return results;
+}
 void showTextMenu(){
   /* will fix later*/
   stroke(255);
@@ -90,7 +125,8 @@ void showTextMenu(){
   textAlign(LEFT,BOTTOM);
   if( p_detail != null ){
     String pixel_content = "i: " + i + ",j: " + j + "\n";// e1: " + p_detail.x + "\n,e2: " + p_detail.y +  "\n,e3: " + p_detail.z;
-    for(int i = 0 ; i != p_detail.length ; i++ ){
+    for(int p = 0 ; p != p_detail.length ; p++ ){
+      pixel_content += "e" + p + ": " + p_detail[p] + "\n"; 
     }
     
     fill(255);
@@ -111,6 +147,7 @@ void showTextMenu(){
 }
 
 void setup() {
+   Image_NoAccept = loadImage( "NoAcceptMarker.png" );
   size(520, 520);
   if (frame!=null) frame.setResizable(true);
   textSize(16);
@@ -144,6 +181,28 @@ void setup() {
   //testCase25();
   
 }
+void writeLine( int x, int y ,int x1 , int y1 , String tag , color fc , boolean accept){
+   x = 20*x + 10;   y = 20*y + 10; 
+  x1 = 20*x1 + 10; y1 = 20*y1 + 10;
+  strokeWeight( 2 );
+  stroke( fc );
+  line( x , y , x1 , y1 ); 
+  
+  float center_x = 0.5*x + 0.5*x1;
+  float center_y = 0.5*y + 0.5*y1;
+  
+  fill( 255 , 255 , 255 , 127 );
+  ellipse( center_x , center_y , 30 , 30 );
+  fill( 0 );
+  textAlign( CENTER , CENTER );
+  text( tag , center_x , center_y );
+  strokeWeight( 1 ); 
+  
+  if( !accept ){
+    image( Image_NoAccept , center_x - 15 , center_y - 15 , 30 , 30 ); 
+  }
+}
+
 void writePixels( int x, int y, float r ) {
   ellipse(  x*r + 0.5*r, y*r + 0.5*r, r, r );
 }
@@ -187,7 +246,7 @@ boolean windingtNumberTestI( ArrayList<PVector> pts , float x , float y){
   return false;
 }
 
-boolean windingtNumberTestII( ArrayList<PVector> pts ){
+boolean windingtNumberTestII( ArrayList<PVector> pts ){  
   for( int i = 0 ; i < pts.size() - 2 ; i++ ){
     //select two line
     PVector p0 = pts.get(i);
@@ -254,9 +313,13 @@ void fill_polygon(  ArrayList<PVector> pts ){
     xmin = min( xmin , pts.get(i).x );
     ymin = min( ymin , pts.get(i).y );
     
-    xmax = min( xmax , pts.get(i).x );
-    ymax = min( ymax , pts.get(i).y );
+    xmax = max( xmax , pts.get(i).x );
+    ymax = max( ymax , pts.get(i).y );
   }
+  maps.xmin = xmin; maps.ymin = ymin;
+  maps.xmax = xmax; maps.ymax = ymax;
+  
+  /* half space tests
   float xDim =  xmax - xmin + 1;
   float en[] = new float[pts.size()];
   PVector n[] = new PVector[pts.size()];
@@ -266,13 +329,19 @@ void fill_polygon(  ArrayList<PVector> pts ){
   }
    for( int y = (int)ymin ; y <= (int)ymax ; y++ ){
     for( int x = (int)xmin ; x <= (int)xmax ; x++ ){
+      maps.add( en );
       for( int e_num = 0 ; e_num != pts.size() ; e_num++ )
         en[ e_num ] += n[e_num].x;
-        maps.add( true );
     }
-    
     for( int e_num = 0 ; e_num != pts.size() ; e_num++ ) 
      en[ e_num ] += -xDim*n[e_num].x + n[e_num].y; 
+   }
+   
+   /* winding num tests*/
+   for( int y = (int)ymin ; y <= (int)ymax ; y++ ){
+    for( int x = (int)xmin ; x <= (int)xmax ; x++ ){
+      maps.add( windingtNumberTestI( pts , x , y ) );
+    }
    }
 }
 
@@ -335,10 +404,12 @@ void fill_triangle( ArrayList<PVector> pts){
   }
   */
   /*** fixed error*/
+  float e[] = new float[3];
    float xDim =  xmax - xmin + 1; // strike xDim step
  for( int y = (int)ymin ; y <= (int)ymax ; y++ ){
     for( int x = (int)xmin ; x <= (int)xmax ; x++ ){
-      maps.add( new PVector( e1 , e2 , e3 ) );
+      e[0] = e1; e[1] = e2; e[2] = e3;
+      maps.add( e );
       e1 += a1;
       e2 += a2;
       e3 += a3;
@@ -492,18 +563,29 @@ void draw() {
   }
    }
   */
+  
+  float e_map[];
   for(int i = 0 ; i != maps.size() ; i++){
-    float e1,e2,e3;
-    e1 = maps.get(i).x;
-    e2 = maps.get(i).y;
-    e3 = maps.get(i).z;
-    if( (e1 < 0 && e2 < 0 && e3 < 0) || (e1 > 0 && e2 > 0 && e3 > 0) )
-        fill(127);
-    else fill( e1 < 0 ? 255 : 0 , e2 < 0 ? 255 : 0 , e3 < 0 ? 255 : 0 );
+//    float e1,e2,e3;
+    if( maps.is_passed(i) )
+        fill(255, 255 , 0);
+    else fill(127);//fill( e1 < 0 ? 255 : 0 , e2 < 0 ? 255 : 0 , e3 < 0 ? 255 : 0 );
     writePixels( maps.getX(i) , maps.getY(i) , 20);
   }
-  half_space_draw( triangle );
-  
+  //half_space_draw( triangle );
+  if( triangle.size() > 1){
+    int size = triangle.size();
+    boolean b_accept[] = getAcceptMarker(size);
+    for(int i = 0 ; i != size ; i++ ){
+       writeLine( (int)triangle.get(i).x , (int)triangle.get(i).y ,  (int)triangle.get( (i+1)%size ).x  , (int)triangle.get( (i+1)%size ).y , "e" + i , color( 255 * (i&0x04) , 255 * (i&0x02) , 255 * (i&0x01) ) , b_accept[i] );
+    }
+  }
+  for(int i = 0 ; i != triangle.size() ; i++ ){
+     stroke(0);
+     fill(255);
+     writePixels(  (int)triangle.get(i).x , (int)triangle.get(i).y , 20 );
+  }
+
   stroke(0);
    
   popMatrix();
@@ -532,12 +614,17 @@ void keyPressed(){
 }
 void mousePressed() {
   if( mouseButton == LEFT ){
+    /*
     if( triangle.size() >= 3 ){
       triangle.clear();
       maps.clear();
     }
     triangle.add( new PVector( (mouseX - 20)/20 , (mouseY - 20)/20 ) );
     if( triangle.size() >= 3 ) fill_triangle( triangle );
+    */
+    maps.clear();
+    triangle.add( new PVector( (mouseX - 20)/20 , (mouseY - 20)/20 ) );
+    fill_polygon(triangle);
   }else{
     maps.clear();
     triangle.clear();
