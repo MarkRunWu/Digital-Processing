@@ -15,21 +15,47 @@ PrintWriter file;
 ArrayList<PVector> triangle = new ArrayList<PVector>();
 PImage Image_NoAccept;
 class HalfSpaceMap{
-  public void add(float[] es ){
-    float copy_es [] = new float [es.length];
-    boolean t_diff = (es[0] > 0);
-    boolean f_diff = (es[0] < 0);
-    
-    for(int i = 0  ; i != es.length ; i++ ){
-      t_diff &= ( es[i] > 0 );
-      f_diff &= ( es[i] < 0 );
-      copy_es[i] = es[i];
-    }
-    b_maps.add( t_diff | f_diff );
-    maps.add( copy_es );
+  public static final int HALFSPACE = 0;
+  public static final int WINDING_I = 1;
+  public static final int WINDING_II = 2;
+  private int mode = HALFSPACE;
+  
+  public void setMode( int mode ){
+    this.mode = mode; 
   }
-  public void add(boolean passed ){
-    b_maps.add( passed );
+  private void halfspaceTest(float[] e){
+     boolean t_diff = (e[0] > 0);
+     boolean f_diff = (e[0] < 0);
+     for(int i = 0  ; i != e.length ; i++ ){
+        t_diff &= ( e[i] > 0 );
+        f_diff &= ( e[i] < 0 );
+     }
+     b_maps.add( t_diff | f_diff );
+  }
+  private void wildingTest( float[] angles ){
+    float test_angle = 0;
+    for(int i = 0 ; i != angles.length ; i++){
+       test_angle += angles[i];
+    }
+    b_maps.add( test_angle - 2*PI > -1e-5 && test_angle - 2*PI < 1e-5 );
+  }
+  
+  private void wildingTest2( float[] times ){
+    //b_maps.add(   
+  }
+  public void add(float[] data ){
+    float copy_data [] = new float [data.length];
+    for(int i = 0  ; i != data.length ; i++ ){
+      copy_data[i] = data[i];
+    }
+    maps.add( copy_data );
+    if( mode == HALFSPACE ){
+      halfspaceTest( copy_data);
+    }else if( mode == WINDING_I ){
+      wildingTest( copy_data );
+    }else if( mode == WINDING_II ){
+      halfspaceTest( copy_data );
+    }
   }
   public void clear(){
     maps.clear();
@@ -107,11 +133,11 @@ boolean[] getAcceptMarker(int size){
 }
 void showTextMenu(){
   /* will fix later*/
-  stroke(255);
+  /*stroke(255);
   fill(0);
   String anti = "Anti-aliasing: " + (b_antialiasing ? "(Enable)" : "(Disable)");
   text( anti , 10 , 10 );
-  
+  */
   /*
   String t = "points num: " + triangle.size(); 
   text( t  , mouseX + 10 , mouseY + 50);
@@ -125,10 +151,15 @@ void showTextMenu(){
   textAlign(LEFT,BOTTOM);
   if( p_detail != null ){
     String pixel_content = "i: " + i + ",j: " + j + "\n";// e1: " + p_detail.x + "\n,e2: " + p_detail.y +  "\n,e3: " + p_detail.z;
-    for(int p = 0 ; p != p_detail.length ; p++ ){
-      pixel_content += "e" + p + ": " + p_detail[p] + "\n"; 
-    }
     
+    float sum = 0;
+    for(int p = 0 ; p != p_detail.length ; p++ ){
+      pixel_content +=  p + ".: " + p_detail[p] + "\n";
+      sum += p_detail[p]; 
+    }
+    if( option == 1 ){
+      pixel_content += "sum: " + sum;
+    }
     fill(255);
     rect( mouseX + 5 , mouseY + 10 , 200 , 200);
     fill(0); 
@@ -140,6 +171,14 @@ void showTextMenu(){
     stroke(255,0,255);
     fill(255,255,0);
     writePixels( mouseX/20 , mouseY/20 , 20 );
+    String method_name = ""; 
+    switch( option ){
+      case 1: method_name = "Winding NumberI"; break;
+      case 2: method_name = "Half sapce"; break;
+      case 3: method_name = "Winding NumberII"; break;
+    }
+    text( method_name , mouseX/20 , mouseY/20 );
+    
   }
   fill( 255 , 0 , 255);
   //rect( mouseX + 10 , mouseY + 30 , t.length() * 16 , 20 ); 
@@ -224,41 +263,101 @@ void ScreenPixels(int cols, int rows, float r) {
 }
 
 
-boolean windingtNumberTestI( ArrayList<PVector> pts , float x , float y){
-  float angle = 0;
-  PVector point = new PVector( x , y ); 
-  for( int i = 0 ; i != pts.size() - 1; i++){
-    PVector p0 = new PVector( pts.get(i).x , pts.get(i).y );
-    PVector p1 = new PVector( pts.get(i+1).x , pts.get(i+1).y );
-    
-    p0.sub( point );
-    p1.sub( point );
-    
-    p0.normalize();
-    p1.normalize();
-    
-    angle += acos( p0.dot( p1 ) );
-  }
+void windingNumberTestI( ArrayList<PVector> pts){
+  if( pts.size() < 3 )return;
+  findBoundary( pts , maps );
+  maps.setMode( HalfSpaceMap.WINDING_I ); 
+  float angle[] = new float[pts.size()];
+ 
+  /* winding num tests*/
+   for( int y = (int)maps.ymin ; y <= (int)maps.ymax ; y++ ){
+    for( int x = (int)maps.xmin ; x <= (int)maps.xmax ; x++ ){
+      PVector point = new PVector( x , y ); 
+      for( int i = 0 ; i != pts.size() ; i++){
+        PVector p0 = new PVector( pts.get(i).x , pts.get(i).y );
+        PVector p1 = new PVector( pts.get( (i+1)%pts.size() ).x , pts.get( (i+1)%pts.size() ).y );
+        
+        p0.sub( point );
+        p1.sub( point );
+        
+        p0.normalize();
+        p1.normalize();
+        
+       angle[i] = acos( p0.dot( p1 ) );
+      }
+      maps.add( angle );
+    }
+   }
+}
+
+boolean isIntersetion(PVector line0_p0 , PVector line0_p1 , PVector line1_p0 , PVector line1_p1 ){
+  float x1,x2,x3,x4;
+  float y1,y2,y3,y4;
   
-  if( angle - 2*PI > -1e-10 && angle - 2*PI < 1e+10 ){
-    return true;
+  x1 = line0_p0.x; x2 = line0_p1.x;
+  x3 = line1_p0.x; x4 = line1_p1.x;
+  
+  y1 = line0_p0.y; y2 = line0_p1.y;
+  y3 = line1_p0.y; y4 = line1_p1.y;
+  
+  float d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
+  if( d > 1e-10 || d < -1e-10){
+    PVector p = new PVector( (x1*y2 - y1*x2)*(x3-x4) - (x1-x2)*(x3*y4 - y3*x4) / d , (x1*y2 - y1*x2)*(y3-y4) - (y1-y2)*(x3*y4 - y3*x4) / d);
+    float min_line0x = min( line0_p0.x , line0_p1.x );
+    float max_line0x = max( line0_p0.x , line0_p1.x ); 
+    float min_line0y = min( line0_p0.y , line0_p1.y );
+    float max_line0y = max( line0_p0.y , line0_p1.y );
+    if( p.x >= min_line0x && p.x <= max_line0x && p.y >= min_line0y && p.y <= max_line0y )
+      return true;
   }
   return false;
 }
-
-boolean windingtNumberTestII( ArrayList<PVector> pts ){  
-  for( int i = 0 ; i < pts.size() - 2 ; i++ ){
-    //select two line
-    PVector p0 = pts.get(i);
-    PVector p1 = pts.get(i + 1);
-    PVector p2 = pts.get(i + 2);
-    
-    //continue from next line
-    for( int j = i  + 1 ; j < pts.size() ; j++ ){
-      
+void windingtNumberTestII( ArrayList<PVector> pts ){
+  if( pts.size() < 3 )return;
+  findBoundary( pts , maps );
+  maps.setMode( HalfSpaceMap.WINDING_II );
+   for( int y = (int)maps.ymin ; y <= (int)maps.ymax ; y++ ){
+    for( int x = (int)maps.xmin ; x <= (int)maps.xmax ; x++ ){
+      for( int i = 0 ; i < pts.size() - 2 ; i++ ){
+      //select two line
+      PVector p0 = pts.get(i);
+      PVector p1 = pts.get(i + 1);
+      PVector p2 = pts.get(i + 2);
+      PVector p3 = pts.get((i + 3) % pts.size() );
+      PVector n = new PVector();
+      float en[] = new float[3];
+      if( isIntersetion( p0 , p1 , p2 , p3 ) ){
+        en[0] = lineEq(p0,p1,x,y,n);
+        en[1] = lineEq(p1,p2,x,y,n);
+        en[2] = lineEq(p2,p3,x,y,n);
+        maps.add( en );
+      }
+        //continue from next line
+        /*for( int j = (i  + 1) % pts.size() ; j != 0 ;  ++j%pts.size() ){
+          
+        }*/
+      }  
     }
-  }
-  return false;
+   }
+  //return false;
+}
+
+void findBoundary( ArrayList<PVector> pts , HalfSpaceMap map ){
+   float xmin = 1e+30;
+   float ymin = 1e+30;
+  
+   float xmax = 1e-30;
+   float ymax = 1e-30;
+  
+   for( int i = 0 ; i != pts.size() ; i++ ){
+     xmin = min( xmin , pts.get(i).x );
+     ymin = min( ymin , pts.get(i).y );
+    
+     xmax = max( xmax , pts.get(i).x );
+     ymax = max( ymax , pts.get(i).y );
+   }
+   map.xmin = xmin; map.ymin = ymin;
+   map.xmax = xmax; map.ymax = ymax;
 }
 
 float lineEq( PVector p0 , PVector p1 , float x ,float y , PVector n){
@@ -301,47 +400,26 @@ void half_space_draw( ArrayList<PVector> pts ){
     }
   }
 }
-void fill_polygon(  ArrayList<PVector> pts ){
-  if( pts.size() < 3 )return;
-  float xmin = 1e+30;
-  float ymin = 1e+30;
-  
-  float xmax = 1e-30;
-  float ymax = 1e-30;
-  
-  for( int i = 0 ; i != pts.size() ; i++ ){
-    xmin = min( xmin , pts.get(i).x );
-    ymin = min( ymin , pts.get(i).y );
-    
-    xmax = max( xmax , pts.get(i).x );
-    ymax = max( ymax , pts.get(i).y );
-  }
-  maps.xmin = xmin; maps.ymin = ymin;
-  maps.xmax = xmax; maps.ymax = ymax;
-  
-  /* half space tests
-  float xDim =  xmax - xmin + 1;
+void HalfSpaceTest(  ArrayList<PVector> pts ){
+  /* half space tests*/
+  findBoundary( pts , maps );
+  maps.setMode( HalfSpaceMap.HALFSPACE );
+  float xDim =  maps.xmax - maps.xmin + 1;
   float en[] = new float[pts.size()];
   PVector n[] = new PVector[pts.size()];
   for( int i = 0 ; i != pts.size() ; i++ ){
     n[i] = new PVector();
-    en[i] = lineEq( pts.get(i) , pts.get( (i+1)%pts.size() ) , xmin , ymin , n[i]);
+    en[i] = lineEq( pts.get(i) , pts.get( (i+1)%pts.size() ) , maps.xmin , maps.ymin , n[i]);
   }
-   for( int y = (int)ymin ; y <= (int)ymax ; y++ ){
-    for( int x = (int)xmin ; x <= (int)xmax ; x++ ){
+  
+   for( int y = (int)maps.ymin ; y <= (int)maps.ymax ; y++ ){
+    for( int x = (int)maps.xmin ; x <= (int)maps.xmax ; x++ ){
       maps.add( en );
       for( int e_num = 0 ; e_num != pts.size() ; e_num++ )
         en[ e_num ] += n[e_num].x;
     }
     for( int e_num = 0 ; e_num != pts.size() ; e_num++ ) 
      en[ e_num ] += -xDim*n[e_num].x + n[e_num].y; 
-   }
-   
-   /* winding num tests*/
-   for( int y = (int)ymin ; y <= (int)ymax ; y++ ){
-    for( int x = (int)xmin ; x <= (int)xmax ; x++ ){
-      maps.add( windingtNumberTestI( pts , x , y ) );
-    }
    }
 }
 
@@ -387,22 +465,7 @@ void fill_triangle( ArrayList<PVector> pts){
   maps.ymin = ymin;
   maps.xmax = xmax;
   maps.ymax = ymax;
-  /*
-  for( int y = (int)ymin ; y <= (int)ymax ; y++ ){
-    float ee1 = e1;
-    float ee2 = e2;
-    float ee3 = e3;
-    for( int x = (int)xmin ; x <= (int)xmax ; x++ ){
-      maps.add( new PVector( ee1 , ee2 , ee3 ) );
-      ee1 += a1;
-      ee2 += a2;
-      ee3 += a3; 
-    }
-    e1 +=  b1;
-    e2 +=  b2;
-    e3 +=  b3;
-  }
-  */
+ 
   /*** fixed error*/
   float e[] = new float[3];
    float xDim =  xmax - xmin + 1; // strike xDim step
@@ -593,7 +656,20 @@ void draw() {
   //testCase16();
   showTextMenu();
 }
+void runMethod( int index ){
+    maps.clear();
+    switch( index ){
+      case 1: windingNumberTestI(triangle); break;
+      case 2: HalfSpaceTest(triangle); break;
+      case 3: windingtNumberTestII(triangle); break;
+    }
+}
 void keyPressed(){
+  if( key == 'x'){
+    option = (option + 1)%3 + 1;
+    runMethod(option);
+    redraw();
+  }
   if( key == 's')
     ss -= 0.1;
   if( key == 'S')
@@ -612,6 +688,7 @@ void keyPressed(){
   }
    redraw();
 }
+int option = 3;
 void mousePressed() {
   if( mouseButton == LEFT ){
     /*
@@ -622,9 +699,8 @@ void mousePressed() {
     triangle.add( new PVector( (mouseX - 20)/20 , (mouseY - 20)/20 ) );
     if( triangle.size() >= 3 ) fill_triangle( triangle );
     */
-    maps.clear();
     triangle.add( new PVector( (mouseX - 20)/20 , (mouseY - 20)/20 ) );
-    fill_polygon(triangle);
+    runMethod( option );
   }else{
     maps.clear();
     triangle.clear();
