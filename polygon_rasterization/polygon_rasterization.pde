@@ -4,6 +4,7 @@ Remainder Requiremets:
   input fields x y
   log.txt - contains begin_pt and end_pt : a sequence points from begin_pt to end_pt
 */
+
 int begin_pt[] = new int[2];
 int end_pt[] = new int[2];
 int count = 0;
@@ -148,7 +149,7 @@ void showTextMenu(){
   
   float[] p_detail = maps.get( i , j );
   
-  textAlign(LEFT,BOTTOM);
+  textAlign(LEFT,TOP);
   if( p_detail != null ){
     String pixel_content = "i: " + i + ",j: " + j + "\n";// e1: " + p_detail.x + "\n,e2: " + p_detail.y +  "\n,e3: " + p_detail.z;
     
@@ -161,9 +162,10 @@ void showTextMenu(){
       pixel_content += "sum: " + sum;
     }
     fill(255);
-    rect( mouseX + 5 , mouseY + 10 , 200 , 200);
+    
+    rect(  mouseX + 5 , mouseY + 10 , 200 , 200);
     fill(0); 
-    text( pixel_content  , mouseX + 20 , mouseY + 150 );
+    text( pixel_content  , mouseX + 20 , mouseY + 20 );
     
     stroke( 255 , 0 , 0 );
     writePixels( i + (int)maps.xmin + 1 , j  + (int)maps.ymin + 1 , 20 );
@@ -171,21 +173,35 @@ void showTextMenu(){
     stroke(255,0,255);
     fill(255,255,0);
     writePixels( mouseX/20 , mouseY/20 , 20 );
+  }
     String method_name = ""; 
     switch( option ){
       case 1: method_name = "Winding NumberI"; break;
       case 2: method_name = "Half sapce"; break;
       case 3: method_name = "Winding NumberII"; break;
     }
-    text( method_name , mouseX/20 , mouseY/20 );
+    textSize( 32 );
+    textAlign( CENTER , CENTER );
+    stroke( 127,127,255);
+    fill(168,0,0,168);
+    rect( 0 , 0 , width , 16 );
+    fill(0,255,0);
+    text( method_name , width/2 , 8 );
+    fill(0,0,168,168);
+    rect( 0 , height - 16 , width , height );
+    fill(168,0,168);
+    textAlign( CENTER , BOTTOM );
+    text( method_name , width/2 , height );
+    textSize( 16 );
     
-  }
+  
   fill( 255 , 0 , 255);
   //rect( mouseX + 10 , mouseY + 30 , t.length() * 16 , 20 ); 
   stroke(0);
 }
 
 void setup() {
+  frameRate(30);
    Image_NoAccept = loadImage( "NoAcceptMarker.png" );
   size(520, 520);
   if (frame!=null) frame.setResizable(true);
@@ -606,7 +622,7 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1 ) {
   stroke(0);
 }
 
-
+//animationText test_anim = new animationText(new PVector(0,100) , new PVector(500 , 100) , 100 , 100 , 10000 , "Test");
 void draw() {
   background(127);
   pushMatrix();
@@ -655,6 +671,8 @@ void draw() {
   //testCase07();
   //testCase16();
   showTextMenu();
+  //test_anim.draw();
+  
 }
 void runMethod( int index ){
     maps.clear();
