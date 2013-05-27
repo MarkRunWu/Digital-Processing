@@ -622,7 +622,7 @@ void draw_line(int Px0 , int Py0 , int Px1 , int Py1 ) {
   stroke(0);
 }
 
-//animationText test_anim = new animationText(new PVector(0,100) , new PVector(500 , 100) , 100 , 100 , 10000 , "Test");
+
 void draw() {
   background(127);
   pushMatrix();
@@ -652,18 +652,22 @@ void draw() {
     writePixels( maps.getX(i) , maps.getY(i) , 20);
   }
   //half_space_draw( triangle );
+  
+  for(int i = 0 ; i != triangle.size() ; i++ ){
+     stroke(0);
+     fill(255);
+     writePixels(  (int)triangle.get(i).x , (int)triangle.get(i).y , 20 );
+  }
+  for(int i = 0 ; i != triangle.size(); i++){
+     draw_line( (int)triangle.get(i).x , (int)triangle.get(i).y , (int)triangle.get( (i+1)%triangle.size() ).x , (int)triangle.get( (i+1)%triangle.size() ).y );
+  }
   if( triangle.size() > 1){
     int size = triangle.size();
     boolean b_accept[] = getAcceptMarker(size);
     for(int i = 0 ; i != size ; i++ ){
        writeLine( (int)triangle.get(i).x , (int)triangle.get(i).y ,  (int)triangle.get( (i+1)%size ).x  , (int)triangle.get( (i+1)%size ).y , "e" + i , color( 255 * (i&0x04) , 255 * (i&0x02) , 255 * (i&0x01) ) , b_accept[i] );
     }
-  }
-  for(int i = 0 ; i != triangle.size() ; i++ ){
-     stroke(0);
-     fill(255);
-     writePixels(  (int)triangle.get(i).x , (int)triangle.get(i).y , 20 );
-  }
+  }  
 
   stroke(0);
    
@@ -671,7 +675,6 @@ void draw() {
   //testCase07();
   //testCase16();
   showTextMenu();
-  //test_anim.draw();
   
 }
 void runMethod( int index ){

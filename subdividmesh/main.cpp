@@ -206,7 +206,7 @@ void RenderScene(void)
 	glPopMatrix();
 	
 	//顯示文字訊息
-	glColor3f(0.0f,0.0f,0.0f);
+	glColor3f(1.0f,1.0f,1.0f);
 
 	string output_txt = "";
 	output_txt = subdivid_count_text;
@@ -238,6 +238,7 @@ void Init(){
 	glutInitWindowSize(900, 600);
 	glutCreateWindow("mini hw lighting/normal/subdivide 100598020");
 	
+	glClearColor(0,0,0,1);
 	glEnable(GL_DEPTH_TEST);	
 	//isBottomPlaneVisible = true;
 	/* test polygon
@@ -384,7 +385,7 @@ int main(int argc, char* argv[])
 	//連接滑鼠按鈕來使用menu
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 	
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f );
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f );
 	glutReshapeFunc(ChangeSize);
 	glutDisplayFunc(RenderScene);
 	glutSpecialFunc(My_SpecialKeys);
