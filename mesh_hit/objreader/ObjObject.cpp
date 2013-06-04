@@ -1,6 +1,6 @@
 #include "ObjObject.h"
 #include <cmath>
-
+using namespace obj;
 ObjObject::ObjObject(void)
 {
 	n = fn = 0;

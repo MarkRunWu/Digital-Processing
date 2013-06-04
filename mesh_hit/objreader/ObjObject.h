@@ -5,7 +5,7 @@
 #define OBJ_ADD_POINT 11
 #define OBJ_COMPOSITE_FACE 13
 using namespace std;
-
+namespace obj{
 typedef struct{
 	float x;
 	float y;
@@ -51,3 +51,4 @@ private:
 	float scale_z;
 };
 
+}
