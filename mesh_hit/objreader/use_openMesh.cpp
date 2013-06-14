@@ -47,8 +47,8 @@ void deleteVertex( MyMesh::VertexHandle h ){
 		vhandles.clear();
 		if( !mesh.status( vs[0]).deleted() && !mesh.status( vs[i]).deleted() && !mesh.status( vs[i+1]).deleted() ){
 			vhandles.push_back( vs[0] );
-			vhandles.push_back( vs[i+1] );
 			vhandles.push_back( vs[i] );
+			vhandles.push_back( vs[i+1] );
 			mesh.add_face( vhandles );
 		}
 	}

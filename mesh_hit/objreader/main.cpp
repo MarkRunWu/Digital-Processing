@@ -7,10 +7,7 @@
 using namespace std;
 
 
-//openMesh
-#include <OpenMesh/Core/IO/MeshIO.hh>
-#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
-typedef OpenMesh::TriMesh_ArrayKernelT<> MyMesh;
+#include "common.h"
 
 extern MyMesh mesh;
 extern void initMesh(obj::ObjObject*);
@@ -288,7 +285,9 @@ void mouse( int button , int state , int x , int y ){
 	cout << mesh.n_vertices() << endl;
 	vector<int> pths;
 	//for(int i = 0 ; i != 10 ; i++ )
-		pths.push_back( 0 );
+	pths.push_back( 1 );
+	float* pos = mesh.point( mesh.vertex_handle( 1 ) ).data();
+	cout << pos[0] << "," << pos[1] << "," << pos[2] << endl;
 	SolveLinearSystem( &mesh , pths );
 	/*
 	float* pos;

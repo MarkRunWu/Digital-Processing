@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "objreader", "objreader\objreader.vcxproj", "{2CE137CD-1648-42C6-947C-411E2FCE6C76}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "littledrawer", "littledrawer\littledrawer.vcxproj", "{9AB60F4B-8769-4299-9E0E-4F5AA2053424}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{2CE137CD-1648-42C6-947C-411E2FCE6C76}.Debug|Win32.Build.0 = Debug|Win32
 		{2CE137CD-1648-42C6-947C-411E2FCE6C76}.Release|Win32.ActiveCfg = Release|Win32
 		{2CE137CD-1648-42C6-947C-411E2FCE6C76}.Release|Win32.Build.0 = Release|Win32
+		{9AB60F4B-8769-4299-9E0E-4F5AA2053424}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9AB60F4B-8769-4299-9E0E-4F5AA2053424}.Debug|Win32.Build.0 = Debug|Win32
+		{9AB60F4B-8769-4299-9E0E-4F5AA2053424}.Release|Win32.ActiveCfg = Release|Win32
+		{9AB60F4B-8769-4299-9E0E-4F5AA2053424}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
