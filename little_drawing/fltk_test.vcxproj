@@ -26,6 +26,7 @@
     <ClInclude Include="GUA_OM.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="PointSet_Element.h" />
+    <ClInclude Include="tool.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BC42EA39-CD70-4EAD-BB69-F871E8D214E8}</ProjectGuid>

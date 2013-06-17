@@ -91,6 +91,7 @@ int GLPanel::draw_state_handle(int Event ){
 		Draw_Element* pElment = new BSpline_Element( drawing_element.getPts() );
 		pElment->setColor( R,G,B );
 		records.push_back( pElment );
+		b_modified = true;
 		drawing_element.release();
 		state_drawing = false;
 
@@ -107,33 +108,50 @@ int GLPanel::handle( int Event ){
 	}
 	return Fl_Gl_Window::handle(Event);
 }
+void GLPanel::save2background(){
+	glReadPixels( 0 , 0 , w() , h() , GL_RGB , GL_UNSIGNED_BYTE , background );
+    glBindTexture( GL_TEXTURE_2D , _texBackground );
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); // Linear Filtering
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Linear Filtering
+	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGB , w() , h() , 0 , GL_RGB , GL_UNSIGNED_BYTE , this->background );
+	
+}
 void GLPanel::draw(){
 	if( !valid() ){
+		if( background != NULL )delete []background;
+		background = new unsigned char[w()*h()*4];
 		glClearColor(1.0,1.0,1.0,1.0);
 		glViewport( 0 , 0 , w() , h() );
 		glOrtho( 0 , w() , h() , 0 , 0 , 1);
+		
+	}
+	if( !context_valid() ){
+		glGenTextures( 1 , &this->_texBackground );
 	}
 	glClear( GL_COLOR_BUFFER_BIT );
-	glColor3ub(0,0,0);
-	for( vector<Draw_Element*>::iterator p = records.begin(); p != records.end() ; ++p )
-		(*p)->paint();
+
+	if( b_modified ){
+		for( vector<Draw_Element*>::iterator p = records.begin(); p != records.end() ; ++p )
+			(*p)->paint();
+		b_modified = false;
+		save2background();
+	}else{
+		glBindTexture( GL_TEXTURE_2D , _texBackground );
+		glEnable( GL_TEXTURE_2D );
+		glColor3ub(255,255,255);
+		glBegin( GL_QUADS );
+		glTexCoord2i( 0 , 1 );
+		glVertex2i( 0 , 0 );
+		glTexCoord2i( 1 , 1 );
+		glVertex2i( w() , 0 );
+		glTexCoord2i( 1 , 0 );
+		glVertex2i( w() , h() );
+		glTexCoord2i( 0 , 0 );
+		glVertex2i( 0 , h() );
+		glEnd();
+		glDisable( GL_TEXTURE_2D );
+	}
+	glColor3ub( 0 ,0 ,0 );
 	if( state_drawing )
 		drawing_element.paint();
-}
-
-void GLPanel::drawLine( float x , float y , float x1 , float y1 ){
-	glBegin( GL_LINES );
-	glVertex2f( x , y );
-	glVertex2f( x1 , y1 );
-	glEnd();
-}
-
-void GLPanel::drawCircle( float x , float y , float r){
-	float dt = M_PI / 180;
-	glBegin( GL_LINES );
-	for( float t = 0 ; t < 2*M_PI ; t += dt ){
-		glVertex2f( x + r*cos(t) , y + r*sin(t) );
-		glVertex2f( x + r*cos(t + dt) , y + r*sin(t + dt) );
-	}
-	glEnd();
 }
