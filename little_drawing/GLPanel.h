@@ -8,6 +8,9 @@
 #include "PointSet_Element.h"
 #include "BSpline_Element.h"
 #include "presentation_model.h"
+#include "state.h"
+#include "State_SetCurvePoint.h"
+
 using namespace std;
 
 class GLPanel : public Fl_Gl_Window{
@@ -30,6 +33,7 @@ protected:
 	void draw();
 	int handle(int Event);
 private:
+	state* _pState;
 	void save2background();
 	GLuint _texBackground;
 	unsigned char* background;

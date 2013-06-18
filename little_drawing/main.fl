@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
+version 1.0301 
 header_name {.h} 
 code_name {.cxx}
 decl {\#include "presentation_model.h"} {public global
@@ -11,22 +11,44 @@ decl {Presentation_model model;} {private local
 Function {make_stroke_window()} {open
 } {
   Fl_Window pStroke_window {open
-    xywh {606 238 353 261} type Double visible
+    xywh {276 323 353 261} type Double
+    code0 {\#include "FL\\fl_show_colormap.H"} visible
   } {
     Fl_Value_Slider start_radius {
       label begin
       callback {save_stroke_settings();}
-      xywh {65 10 260 70} type Horizontal align 4 maximum 30 step 1 textsize 14
+      xywh {53 10 260 70} type Horizontal align 4 minimum 1 maximum 30 step 1 value 1 textsize 14
     }
     Fl_Value_Slider middle_radius {
       label middle
       callback {save_stroke_settings();}
-      xywh {65 95 260 70} type Horizontal align 4 maximum 30 step 1 textsize 14
+      xywh {53 95 260 70} type Horizontal align 4 minimum 1 maximum 30 step 1 value 1 textsize 14
     }
     Fl_Value_Slider end_radius {
       label end
       callback {save_stroke_settings();}
-      xywh {65 180 260 70} type Horizontal align 4 maximum 30 step 1 textsize 14
+      xywh {53 180 260 70} type Horizontal align 4 minimum 1 maximum 30 step 1 value 1 textsize 14
+    }
+    Fl_Button begin_color {
+      callback {Fl_Color c;
+c = fl_show_colormap( begin_color->color() );
+begin_color->color( c );
+Fl::get_color( c , model.begin_R, model.begin_G , model.begin_B );}
+      xywh {320 30 25 30}
+    }
+    Fl_Button middle_color {
+      callback {Fl_Color c;
+c = fl_show_colormap( middle_color->color() );
+middle_color->color( c );
+Fl::get_color( c , model.middle_R, model.middle_G , model.middle_B );}
+      xywh {320 115 25 30}
+    }
+    Fl_Button end_color {
+      callback {Fl_Color c;
+c = fl_show_colormap( end_color->color() );
+end_color->color( c );
+Fl::get_color( c  , model.end_R, model.end_G , model.end_B );}
+      xywh {320 205 25 30}
     }
   }
 } 
@@ -40,8 +62,10 @@ model.Radius_end = end_radius->value();} {}
 
 Function {} {open
 } {
-  Fl_Window {} {open
-    xywh {234 163 835 586} type Double visible
+  Fl_Window pWindow {
+    callback {if( pStroke_window ) pStroke_window->hide();
+pWindow->hide();} open
+    xywh {946 325 835 586} type Double visible
   } {
     Fl_Group pGLPanel {open
       xywh {150 0 685 585}
@@ -55,7 +79,7 @@ Function {} {open
         callback {pGLPanel->setState( GLPanel::LITTLE_DRAW );
 make_stroke_window();
 pStroke_window->show();}
-        image {GreenCons/PNGs/Paint.png} xywh {15 297 128 128} type Radio selection_color 88
+        image {GreenCons/PNGs/Paint.png} xywh {15 300 128 128} type Radio selection_color 88
       }
       Fl_Light_Button {} {
         callback {pGLPanel->setState( GLPanel::LITTLE_DELETE );}

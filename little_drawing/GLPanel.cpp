@@ -8,6 +8,8 @@ GLPanel::~GLPanel(){
 
 void GLPanel::setState(int state ){
 	_state = state;
+	//_pState = new State_SetCurvePoint();
+
 	switch( _state ){
 	case LITTLE_DRAW:
 		cursor( FL_CURSOR_ARROW );
@@ -19,7 +21,13 @@ void GLPanel::setState(int state ){
 		cursor( FL_CURSOR_DEFAULT );
 	}
 }
-
+littleDrawing_Point normalize( littleDrawing_Point p  ){
+	littleDrawing_Point pt;
+	float l = sqrt( p.x*p.x + p.y*p.y );
+	pt.x =  p.x/l;
+	pt.y =  p.y/l;
+	return pt;
+}
 int GLPanel::delete_state_handle(int Event ){
 	switch(Event){
 	case FL_PUSH:
@@ -45,16 +53,18 @@ int GLPanel::delete_state_handle(int Event ){
 				last_pt.x > box_min.x && last_pt.y > box_min.y && last_pt.x < box_max.x && last_pt.y < box_max.y ){
 					vector<littleDrawing_Point> points = (*p)->getPts();
 					//line of last_pt and pt
-					float vx,vy,c,l,d;
-					vx = -last_pt.y + pt.y;
-					vy = last_pt.x - pt.x;
-					l = sqrt( vx*vx + vy*vy );
-					vx /= l; vy /= l;
-					c = -( vx*last_pt.x + vy*last_pt.y );
-					
+					littleDrawing_Point l_pt,r_pt;
 					for( vector<littleDrawing_Point>::iterator lp = points.begin(); lp != points.end() ; ++lp ){
-						d = vx*lp->x - vy*lp->y + c;
-						if(  d > 1 && d < 1  ){
+						l_pt.x = lp->x -  pt.x;
+						l_pt.y = lp->y -  pt.y;
+						r_pt.x = lp->x -  last_pt.x;
+						r_pt.y = lp->y -  last_pt.y;
+						l_pt = normalize( l_pt );
+						r_pt = normalize( r_pt );
+						//cout << l_pt.x - r_pt.x << endl;
+						//cout << l_pt.y - r_pt.y << endl;
+						if( l_pt.x - r_pt.x < 1e-2 && l_pt.x - r_pt.x > -1e-2  &&
+							l_pt.y - r_pt.y < 1e-2 && l_pt.y - r_pt.y > -1e-2 ){
 							b_hit = true;
 							break;
 						}
@@ -67,6 +77,7 @@ int GLPanel::delete_state_handle(int Event ){
 		recycle_ones.clear();
 		records = new_ones;
 		last_pt = pt;
+		this->b_modified = true;
 		redraw();
 		return 1;
 
@@ -90,6 +101,9 @@ int GLPanel::draw_state_handle(int Event ){
 	case FL_RELEASE:
 		BSpline_Element* pElment = new BSpline_Element( drawing_element.getPts() );
 		pElment->setColor( _model->R,_model->G,_model->B );
+		pElment->setBeginColor( _model->begin_R / (float)255 , _model->begin_G/ (float)255 , _model->begin_B/ (float)255 );
+		pElment->setMiddleColor( _model->middle_R/ (float)255 , _model->middle_G/ (float)255 , _model->middle_B / (float)255);
+		pElment->setEndColor( _model->end_R/ (float)255 , _model->end_G/ (float)255 , _model->end_B/ (float)255 );
 		pElment->setStroke( _model->Radius_begin , _model->Radius_middle , _model->Radius_end  );
 		records.push_back( pElment );
 		b_modified = true;
@@ -106,8 +120,6 @@ int GLPanel::handle( int Event ){
 		return draw_state_handle( Event );
 	}else if(  _state == LITTLE_DELETE ){
 		return delete_state_handle( Event );
-	}else if( _state == POINT_SET ){
-		return point_set_handle( Event );
 	}
 	return Fl_Gl_Window::handle(Event);
 }
@@ -155,6 +167,6 @@ void GLPanel::draw(){
 		glDisable( GL_TEXTURE_2D );
 	}
 	glColor3ub( 0 ,0 ,0 );
-	if( state_drawing )
-		drawing_element.paint();
+	//if( state_drawing )
+	drawing_element.paint();
 }

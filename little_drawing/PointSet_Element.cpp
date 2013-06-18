@@ -2,10 +2,14 @@
 
 void PointSet_Element::paint(){
 	glPointSize( _element_size );
+	if( pts.size() > 0 ){
 	glBegin( GL_LINES );
-	for( vector<littleDrawing_Point>::iterator p = pts.begin() ; p != pts.end() ; ++p ){
-		glVertex2f( p->x , p->y );
+		for( size_t i = 0 ; i != pts.size() - 1 ; i++  ){
+			glVertex2f( pts[i].x , pts[i].y );
+			glVertex2f( pts[i+1].x , pts[i+1].y );
+		}
+		glEnd();
 	}
-	glEnd();
+	
 	glPointSize(1);
 }

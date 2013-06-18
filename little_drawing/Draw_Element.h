@@ -29,7 +29,6 @@ public:
 	vector<littleDrawing_Point> getPts(){ return pts; }
 	void getBox( littleDrawing_Point &minBox , littleDrawing_Point &maxBox ){ minBox = _minBox; maxBox = _maxBox;}
 	void setColor( uchar r , uchar g , uchar b ){ this->r = r ; this->g = g; this->b = b; }
-	virtual Draw_Element* clone() = 0;
 protected:
 	littleDrawing_Point _minBox;
 	littleDrawing_Point _maxBox;

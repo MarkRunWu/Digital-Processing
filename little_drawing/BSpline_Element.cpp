@@ -51,22 +51,41 @@ void BSpline_Element::setStroke(float begin, float middle, float end){
 	R[1] = (R[0]*0.25 + R[2]* 0.25)*2;
 	R[3] = (R[2]*0.25 + R[4]* 0.25)*2;
 
+	C[1].r = C[0].r*0.5 + C[2].r*0.5;
+	C[1].g = C[0].g*0.5 + C[2].g*0.5;
+	C[1].b = C[0].b*0.5 + C[2].b*0.5;
+
+	C[3].r = C[2].r*0.5 + C[4].r*0.5;
+	C[3].g = C[2].g*0.5 + C[4].g*0.5;
+	C[3].b = C[2].b*0.5 + C[4].b*0.5;
+
 	int num = pts.size() - 3* (pts.size() / 4);
 	int sum = 0;
 	int j = 0;
 	float dx;
 	float r;
+	RGB color;
+	color.r = color.b = color.g = 0;
+	float dr,db,dg;
 	for( int i = 0 ; i != pts.size() ; i++ ){
 		if( sum == 0 || i >= sum ){
 			dx =  (R[j+1] - R[j])/num;
+			dr =  (C[j+1].r - C[j].r)/num;
+			dg =  (C[j+1].g - C[j].g)/num;
+			db =  (C[j+1].b - C[j].b)/num;
 			sum += num;
 			num = pts.size() / 4;
 			r =  R[j];
+			color = C[j];
 			j++;
 			//cout << r << endl;
 		}
 		stroke_widths.push_back( r );
+		colors.push_back( color );
 		r += dx;		
+		color.r += dr;
+		color.g += dg;
+		color.b += db;
 	}
 }
 void BSpline_Element::paint(){
@@ -83,6 +102,7 @@ void BSpline_Element::paint(){
 		glEnd();
 		  */
 		for(size_t i = 0 ;  i != pts.size() ; i++ ){
+			glColor3f( colors[i].r , colors[i].g , colors[i].b );
 			if( stroke_widths.size() )
 				drawCircle( pts[i].x , pts[i].y , stroke_widths[i] );
 			else drawCircle( pts[i].x , pts[i].y , 1 );
