@@ -88,8 +88,9 @@ int GLPanel::draw_state_handle(int Event ){
 		redraw();
 		return 1;
 	case FL_RELEASE:
-		Draw_Element* pElment = new BSpline_Element( drawing_element.getPts() );
-		pElment->setColor( R,G,B );
+		BSpline_Element* pElment = new BSpline_Element( drawing_element.getPts() );
+		pElment->setColor( _model->R,_model->G,_model->B );
+		pElment->setStroke( _model->Radius_begin , _model->Radius_middle , _model->Radius_end  );
 		records.push_back( pElment );
 		b_modified = true;
 		drawing_element.release();
@@ -105,6 +106,8 @@ int GLPanel::handle( int Event ){
 		return draw_state_handle( Event );
 	}else if(  _state == LITTLE_DELETE ){
 		return delete_state_handle( Event );
+	}else if( _state == POINT_SET ){
+		return point_set_handle( Event );
 	}
 	return Fl_Gl_Window::handle(Event);
 }

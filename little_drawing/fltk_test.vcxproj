@@ -17,6 +17,9 @@
     <ClCompile Include="GLPanel.cpp" />
     <ClCompile Include="main.cxx" />
     <ClCompile Include="PointSet_Element.cpp" />
+    <ClCompile Include="presentation_model.cpp" />
+    <ClCompile Include="state.cpp" />
+    <ClCompile Include="State_SetCurvePoint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BSpline_Element.h" />
@@ -26,6 +29,9 @@
     <ClInclude Include="GUA_OM.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="PointSet_Element.h" />
+    <ClInclude Include="presentation_model.h" />
+    <ClInclude Include="state.h" />
+    <ClInclude Include="State_SetCurvePoint.h" />
     <ClInclude Include="tool.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

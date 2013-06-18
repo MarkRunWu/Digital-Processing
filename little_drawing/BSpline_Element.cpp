@@ -1,6 +1,7 @@
 #include "BSpline_Element.h"
 
-
+BSpline_Element::BSpline_Element(){
+}
 BSpline_Element::BSpline_Element(vector<littleDrawing_Point> pt){
 	vector< OMT::Vector3d > v;
 	OMT::Vector3d tmp;
@@ -35,15 +36,21 @@ BSpline_Element::BSpline_Element(vector<littleDrawing_Point> pt){
 		}
 	}
 
+	//setStroke();
+
+	//for(int i = 0 ; i != 5 ; i ++)
+//		cout << R[i] << endl;
 	
-	float R[5];// #seg + 1
-	R[0] = 4;
-	R[2] = 20;
-	R[4] = 5;
+	updateBox();
+}
+
+void BSpline_Element::setStroke(float begin, float middle, float end){
+	R[0] = begin;
+	R[2] = middle;
+	R[4] = end;
 	R[1] = (R[0]*0.25 + R[2]* 0.25)*2;
 	R[3] = (R[2]*0.25 + R[4]* 0.25)*2;
-	for(int i = 0 ; i != 5 ; i ++)
-		cout << R[i] << endl;
+
 	int num = pts.size() - 3* (pts.size() / 4);
 	int sum = 0;
 	int j = 0;
@@ -56,12 +63,11 @@ BSpline_Element::BSpline_Element(vector<littleDrawing_Point> pt){
 			num = pts.size() / 4;
 			r =  R[j];
 			j++;
-			cout << r << endl;
+			//cout << r << endl;
 		}
 		stroke_widths.push_back( r );
 		r += dx;		
 	}
-	updateBox();
 }
 void BSpline_Element::paint(){
 	if( pts.size() ){
@@ -77,7 +83,9 @@ void BSpline_Element::paint(){
 		glEnd();
 		  */
 		for(size_t i = 0 ;  i != pts.size() ; i++ ){
-			drawCircle( pts[i].x , pts[i].y , stroke_widths[i] );
+			if( stroke_widths.size() )
+				drawCircle( pts[i].x , pts[i].y , stroke_widths[i] );
+			else drawCircle( pts[i].x , pts[i].y , 1 );
 		} 
 		glLineWidth( 1 );
 	}

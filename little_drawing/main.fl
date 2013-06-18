@@ -1,11 +1,47 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0301 
+version 1.0302 
 header_name {.h} 
 code_name {.cxx}
+decl {\#include "presentation_model.h"} {public global
+} 
+
+decl {Presentation_model model;} {private local
+} 
+
+Function {make_stroke_window()} {open
+} {
+  Fl_Window pStroke_window {open
+    xywh {606 238 353 261} type Double visible
+  } {
+    Fl_Value_Slider start_radius {
+      label begin
+      callback {save_stroke_settings();}
+      xywh {65 10 260 70} type Horizontal align 4 maximum 30 step 1 textsize 14
+    }
+    Fl_Value_Slider middle_radius {
+      label middle
+      callback {save_stroke_settings();}
+      xywh {65 95 260 70} type Horizontal align 4 maximum 30 step 1 textsize 14
+    }
+    Fl_Value_Slider end_radius {
+      label end
+      callback {save_stroke_settings();}
+      xywh {65 180 260 70} type Horizontal align 4 maximum 30 step 1 textsize 14
+    }
+  }
+} 
+
+Function {save_stroke_settings()} {open
+} {
+  code {model.Radius_begin = start_radius->value();
+model.Radius_middle = middle_radius->value();
+model.Radius_end = end_radius->value();} {}
+} 
+
 Function {} {open
 } {
   Fl_Window {} {open
-    xywh {309 142 835 586} type Double visible
+    xywh {234 163 835 586} type Double visible
   } {
     Fl_Group pGLPanel {open
       xywh {150 0 685 585}
@@ -13,22 +49,28 @@ Function {} {open
       class GLPanel
     } {}
     Fl_Group {} {open
-      xywh {10 290 135 285}
+      xywh {10 157 138 418}
     } {
       Fl_Light_Button {} {
-        callback {pGLPanel->setState( GLPanel::LITTLE_DRAW );}
+        callback {pGLPanel->setState( GLPanel::LITTLE_DRAW );
+make_stroke_window();
+pStroke_window->show();}
         image {GreenCons/PNGs/Paint.png} xywh {15 297 128 128} type Radio selection_color 88
       }
       Fl_Light_Button {} {
         callback {pGLPanel->setState( GLPanel::LITTLE_DELETE );}
         image {GreenCons/PNGs/Trash.png} xywh {15 437 128 128} type Radio selection_color 1
       }
+      Fl_Light_Button {} {
+        callback {pGLPanel->setState( GLPanel::POINT_SET );} selected
+        image {GreenCons/PNGs/point_set.png} xywh {15 162 128 128} type Radio selection_color 88
+      }
     }
     Fl_Button {} {
-      callback {uchar r,g,b;
-fl_color_chooser("color" , pGLPanel->R , pGLPanel->G , pGLPanel->B , -1 );} selected
-      image {GreenCons/PNGs/Tools.png} xywh {20 47 128 128}
+      callback {fl_color_chooser("color" , model.R , model.G , model.B , -1 );}
+      image {GreenCons/PNGs/Tools.png} xywh {20 12 128 128}
       code0 {\#include <FL/Fl_Color_Chooser.H>}
     }
   }
+  code {pGLPanel->addModel( &model );} {}
 } 
