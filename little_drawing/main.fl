@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0301 
+version 1.0302 
 header_name {.h} 
 code_name {.cxx}
 decl {\#include "presentation_model.h"} {public global
@@ -11,7 +11,7 @@ decl {Presentation_model model;} {private local
 Function {make_stroke_window()} {open
 } {
   Fl_Window pStroke_window {open
-    xywh {276 323 353 261} type Double
+    xywh {375 220 366 355} type Double
     code0 {\#include "FL\\fl_show_colormap.H"} visible
   } {
     Fl_Value_Slider start_radius {
@@ -50,6 +50,28 @@ end_color->color( c );
 Fl::get_color( c  , model.end_R, model.end_G , model.end_B );}
       xywh {320 205 25 30}
     }
+    Fl_Choice stroke_selection {
+      label {choice:}
+      callback {model.stroke_type = stroke_selection->value();} open
+      xywh {60 290 70 30} down_box BORDER_BOX
+    } {
+      MenuItem {} {
+        label none
+        xywh {0 0 30 20}
+      }
+      MenuItem {} {
+        label stroke1
+        xywh {10 10 30 20}
+      }
+      MenuItem {} {
+        label stroke2
+        xywh {20 20 30 20}
+      }
+      MenuItem {} {
+        label stroke3
+        xywh {30 30 30 20}
+      }
+    }
   }
 } 
 
@@ -65,35 +87,63 @@ Function {} {open
   Fl_Window pWindow {
     callback {if( pStroke_window ) pStroke_window->hide();
 pWindow->hide();} open
-    xywh {946 325 835 586} type Double visible
+    xywh {540 176 837 622} type Double visible
   } {
     Fl_Group pGLPanel {open
-      xywh {150 0 685 585}
+      xywh {150 34 685 585}
       code0 {\#include "GLPanel.h"}
       class GLPanel
     } {}
-    Fl_Group {} {open
-      xywh {10 157 138 418}
+    Fl_Group {} {open selected
+      xywh {10 197 138 418}
     } {
       Fl_Light_Button {} {
         callback {pGLPanel->setState( GLPanel::LITTLE_DRAW );
-make_stroke_window();
+if( pStroke_window == NULL )
+	make_stroke_window();
 pStroke_window->show();}
-        image {GreenCons/PNGs/Paint.png} xywh {15 300 128 128} type Radio selection_color 88
+        image {GreenCons/PNGs/Paint.png} xywh {15 340 128 128} type Radio selection_color 88
       }
       Fl_Light_Button {} {
         callback {pGLPanel->setState( GLPanel::LITTLE_DELETE );}
-        image {GreenCons/PNGs/Trash.png} xywh {15 437 128 128} type Radio selection_color 1
+        image {GreenCons/PNGs/Trash.png} xywh {15 477 128 128} type Radio selection_color 1
       }
       Fl_Light_Button {} {
-        callback {pGLPanel->setState( GLPanel::POINT_SET );} selected
-        image {GreenCons/PNGs/point_set.png} xywh {15 162 128 128} type Radio selection_color 88
+        callback {pGLPanel->setState( GLPanel::POINT_SET );}
+        image {GreenCons/PNGs/point_set.png} xywh {15 202 128 128} type Radio selection_color 88
       }
     }
     Fl_Button {} {
       callback {fl_color_chooser("color" , model.R , model.G , model.B , -1 );}
-      image {GreenCons/PNGs/Tools.png} xywh {20 12 128 128}
+      image {GreenCons/PNGs/Tools.png} xywh {15 32 128 128}
       code0 {\#include <FL/Fl_Color_Chooser.H>}
+    }
+    Fl_Menu_Bar {} {open
+      xywh {0 0 837 20}
+    } {
+      Submenu {} {
+        label File open
+        xywh {0 0 62 20}
+      } {
+        MenuItem {} {
+          label open
+          xywh {0 0 30 20}
+        }
+        MenuItem {} {
+          label save
+          xywh {10 10 30 20}
+        }
+      }
+      Submenu {} {
+        label Feature open
+        xywh {0 0 62 20}
+      } {
+        MenuItem cache_bk {
+          label {cache image}
+          callback {pGLPanel->toggle_background( cache_bk->value() );}
+          xywh {0 0 30 20} type Toggle
+        }
+      }
     }
   }
   code {pGLPanel->addModel( &model );} {}

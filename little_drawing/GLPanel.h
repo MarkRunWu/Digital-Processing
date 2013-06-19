@@ -7,9 +7,11 @@
 #include "Draw_Element.h"
 #include "PointSet_Element.h"
 #include "BSpline_Element.h"
+#include "TextureStroke.h"
 #include "presentation_model.h"
 #include "state.h"
 #include "State_SetCurvePoint.h"
+#include "FL/Fl_PNG_Image.H"
 
 using namespace std;
 
@@ -26,13 +28,17 @@ public:
 	 Fl_Gl_Window( x,y,w,h){
 		 background = NULL;
 		 b_modified = false;
+		 b_disable_background = false;
 	 }
 	~GLPanel();
+	void toggle_background( bool signal ){ b_disable_background = signal;  }
 	void setState(int state);
 protected:
 	void draw();
 	int handle(int Event);
 private:
+	bool b_disable_background;
+	void loadStrokeTexture();
 	state* _pState;
 	void save2background();
 	GLuint _texBackground;
@@ -46,6 +52,7 @@ private:
 	int _state;
 	littleDrawing_Point last_pt;
 	bool b_modified;
+	GLuint _texStroke[3];
 };
 
 #endif

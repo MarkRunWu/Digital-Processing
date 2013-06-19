@@ -18,8 +18,8 @@ public :
 	void setBeginColor( float r,float  g , float b){ C[0].r = r; C[0].g = g; C[0].b = b; }
 	void setMiddleColor( float r,float  g , float b){ C[2].r = r; C[2].g = g; C[2].b = b; }
 	void setEndColor( float r,float  g, float b){ C[4].r = r; C[4].g = g; C[4].b = b; }
-	void paint();
-private:
+	virtual void paint();
+protected:
 	float R[5]; //stroke parameters
 	RGB C[5];
 	float begin;

@@ -101,12 +101,18 @@ void BSpline_Element::paint(){
 		}
 		glEnd();
 		  */
+		
 		for(size_t i = 0 ;  i != pts.size() ; i++ ){
 			glColor3f( colors[i].r , colors[i].g , colors[i].b );
+			/*
 			if( stroke_widths.size() )
 				drawCircle( pts[i].x , pts[i].y , stroke_widths[i] );
 			else drawCircle( pts[i].x , pts[i].y , 1 );
+			*/
+			glPointSize( stroke_widths[i] );
+			glBegin( GL_POINTS );
+			glVertex2f( pts[i].x , pts[i].y );
+			glEnd();
 		} 
-		glLineWidth( 1 );
 	}
 }

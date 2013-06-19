@@ -10,9 +10,11 @@ public:
 	Presentation_model(){
 		R = G = B = 0;
 	    Radius_begin = Radius_middle = Radius_end = 1;
+		stroke_type = 0;
 	}
 	void subcribe(Fl_Gl_Window* fl);
 	void unSubscribe(Fl_Gl_Window* fl);
+	int stroke_type;
 	uchar R,G,B;
 	uchar begin_R,begin_G,begin_B;
 	uchar middle_R,middle_G,middle_B;

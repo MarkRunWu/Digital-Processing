@@ -3,7 +3,8 @@
 
 
 GLPanel::~GLPanel(){
-
+	glDeleteTextures( 1 , &this->_texBackground );
+	glDeleteTextures( 3 , _texStroke );
 }
 
 void GLPanel::setState(int state ){
@@ -99,13 +100,19 @@ int GLPanel::draw_state_handle(int Event ){
 		redraw();
 		return 1;
 	case FL_RELEASE:
-		BSpline_Element* pElment = new BSpline_Element( drawing_element.getPts() );
+		BSpline_Element* pElment;
+		if( _model->stroke_type == 0){
+			pElment =  new BSpline_Element( drawing_element.getPts() );
+		}else{
+			pElment = new TextureStroke( _texStroke[ _model->stroke_type - 1 ] , drawing_element.getPts() );
+		}
 		pElment->setColor( _model->R,_model->G,_model->B );
 		pElment->setBeginColor( _model->begin_R / (float)255 , _model->begin_G/ (float)255 , _model->begin_B/ (float)255 );
 		pElment->setMiddleColor( _model->middle_R/ (float)255 , _model->middle_G/ (float)255 , _model->middle_B / (float)255);
 		pElment->setEndColor( _model->end_R/ (float)255 , _model->end_G/ (float)255 , _model->end_B/ (float)255 );
 		pElment->setStroke( _model->Radius_begin , _model->Radius_middle , _model->Radius_end  );
 		records.push_back( pElment );
+		cout << records.size() << endl;
 		b_modified = true;
 		drawing_element.release();
 		state_drawing = false;
@@ -138,14 +145,16 @@ void GLPanel::draw(){
 		glClearColor(1.0,1.0,1.0,1.0);
 		glViewport( 0 , 0 , w() , h() );
 		glOrtho( 0 , w() , h() , 0 , 0 , 1);
-		
+		glEnable( GL_POINT_SMOOTH );
+		loadStrokeTexture();
 	}
 	if( !context_valid() ){
 		glGenTextures( 1 , &this->_texBackground );
+		glGenTextures( 3 , _texStroke );
 	}
 	glClear( GL_COLOR_BUFFER_BIT );
 
-	if( b_modified ){
+	if( b_modified || b_disable_background ){
 		for( vector<Draw_Element*>::iterator p = records.begin(); p != records.end() ; ++p )
 			(*p)->paint();
 		b_modified = false;
@@ -169,4 +178,35 @@ void GLPanel::draw(){
 	glColor3ub( 0 ,0 ,0 );
 	//if( state_drawing )
 	drawing_element.paint();
+}
+
+void GLPanel::loadStrokeTexture(){
+	//const char* tex_source[] = { "stroke1.png" , "stroke2.png" , "stroke3.png" };
+	
+	glEnable( GL_TEXTURE_2D );
+	Fl_PNG_Image stroke1( "stroke1.png" );
+	unsigned char image[50*50*4];
+	//const char* const *p = stroke1.data();
+	//const char* data = *p;
+	for( int i = 0 ; i != 10000 ; i+=4 ){
+		image[i] = 255;
+		image[i+1] = 0;
+		image[i+2] = 0;
+		image[i+3] = 255;
+	}
+	//printf( "%d %d %d " , stroke1.w() , stroke1.count() , stroke1.d() );
+	
+	glBindTexture( GL_TEXTURE_2D , _texStroke[0] );
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); // Linear Filtering
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Linear Filtering
+	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGBA , 50 ,50 , 0 , GL_RGBA , GL_UNSIGNED_BYTE , image );
+	/*
+	Fl_PNG_Image stroke2( "stroke2.png" );
+	glBindTexture( GL_TEXTURE_2D , _texStroke[1] );
+	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGBA , stroke1.w() , stroke1.h() , 0 , GL_RGBA , GL_BYTE , stroke2.data() );
+	Fl_PNG_Image stroke3( "stroke3.png" );
+	glBindTexture( GL_TEXTURE_2D , _texStroke[2] );
+	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGBA , stroke1.w() , stroke1.h() , 0 , GL_RGBA , GL_BYTE , stroke3.data() );
+	glDisable( GL_TEXTURE_2D );
+	*/
 }
