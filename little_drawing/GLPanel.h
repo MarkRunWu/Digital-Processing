@@ -29,6 +29,7 @@ public:
 		 background = NULL;
 		 b_modified = false;
 		 b_disable_background = false;
+		 b_load_texture = false;
 	 }
 	~GLPanel();
 	void toggle_background( bool signal ){ b_disable_background = signal;  }
@@ -53,6 +54,7 @@ private:
 	littleDrawing_Point last_pt;
 	bool b_modified;
 	GLuint _texStroke[3];
+	bool b_load_texture;
 };
 
 #endif

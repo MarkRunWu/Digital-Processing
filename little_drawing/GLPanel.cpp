@@ -112,7 +112,7 @@ int GLPanel::draw_state_handle(int Event ){
 		pElment->setEndColor( _model->end_R/ (float)255 , _model->end_G/ (float)255 , _model->end_B/ (float)255 );
 		pElment->setStroke( _model->Radius_begin , _model->Radius_middle , _model->Radius_end  );
 		records.push_back( pElment );
-		cout << records.size() << endl;
+		//cout << records.size() << endl;
 		b_modified = true;
 		drawing_element.release();
 		state_drawing = false;
@@ -146,11 +146,17 @@ void GLPanel::draw(){
 		glViewport( 0 , 0 , w() , h() );
 		glOrtho( 0 , w() , h() , 0 , 0 , 1);
 		glEnable( GL_POINT_SMOOTH );
-		loadStrokeTexture();
+		glEnable( GL_BLEND );
+		glBlendFunc( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
 	}
 	if( !context_valid() ){
 		glGenTextures( 1 , &this->_texBackground );
 		glGenTextures( 3 , _texStroke );
+	}else{
+		if( !b_load_texture){
+			loadStrokeTexture();
+			b_load_texture = true;
+		}
 	}
 	glClear( GL_COLOR_BUFFER_BIT );
 
@@ -185,28 +191,48 @@ void GLPanel::loadStrokeTexture(){
 	
 	glEnable( GL_TEXTURE_2D );
 	Fl_PNG_Image stroke1( "stroke1.png" );
+	Fl_PNG_Image stroke2( "stroke2.png" );
+	Fl_PNG_Image stroke3( "stroke3.png" );
+
 	unsigned char image[50*50*4];
-	//const char* const *p = stroke1.data();
-	//const char* data = *p;
-	for( int i = 0 ; i != 10000 ; i+=4 ){
-		image[i] = 255;
-		image[i+1] = 0;
-		image[i+2] = 0;
-		image[i+3] = 255;
-	}
+
+	const char* data;
 	//printf( "%d %d %d " , stroke1.w() , stroke1.count() , stroke1.d() );
 	
+	data = *stroke1.data();
+	for( int i = 0 ; i != 50 ; i++ ){
+		for( int j = 0 ; j != 200 ; j++ , ++data){
+			image[i*200+j] = *data;
+		}
+	}
 	glBindTexture( GL_TEXTURE_2D , _texStroke[0] );
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); // Linear Filtering
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Linear Filtering
-	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGBA , 50 ,50 , 0 , GL_RGBA , GL_UNSIGNED_BYTE , image );
-	/*
-	Fl_PNG_Image stroke2( "stroke2.png" );
+	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGBA , stroke1.w() , stroke1.h() , 0 , GL_RGBA , GL_UNSIGNED_BYTE , image );
+	
+	
+	data = *stroke2.data();
+	for( int i = 0 ; i != 50 ; i++ ){
+		for( int j = 0 ; j != 200 ; j++ , ++data){
+			image[i*200+j] = *data;
+		}
+	}
 	glBindTexture( GL_TEXTURE_2D , _texStroke[1] );
-	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGBA , stroke1.w() , stroke1.h() , 0 , GL_RGBA , GL_BYTE , stroke2.data() );
-	Fl_PNG_Image stroke3( "stroke3.png" );
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); // Linear Filtering
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Linear Filtering
+	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGBA , stroke2.w() , stroke2.h() , 0 , GL_RGBA , GL_UNSIGNED_BYTE , image );
+	
+
+	data = *stroke3.data();
+	for( int i = 0 ; i != 50 ; i++ ){
+		for( int j = 0 ; j != 200 ; j++ , ++data){
+			image[i*200+j] = *data;
+		}
+	}
 	glBindTexture( GL_TEXTURE_2D , _texStroke[2] );
-	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGBA , stroke1.w() , stroke1.h() , 0 , GL_RGBA , GL_BYTE , stroke3.data() );
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); // Linear Filtering
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Linear Filtering
+	glTexImage2D( GL_TEXTURE_2D , 0 , GL_RGBA , stroke3.w() , stroke3.h() , 0 , GL_RGBA , GL_UNSIGNED_BYTE , image );
 	glDisable( GL_TEXTURE_2D );
-	*/
+	
 }
